@@ -3,7 +3,7 @@
 A production-ready Laravel package for integrating the **SSLCOMMERZ** payment gateway (API v4). Built with clean architecture, fully typed DTOs, event-driven callbacks, and extensible contracts.
 
 [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-8892BF.svg)](https://php.net/)
-[![Laravel](https://img.shields.io/badge/laravel-10.x%20%7C%2011.x-FF2D20.svg)](https://laravel.com)
+[![Laravel](https://img.shields.io/badge/laravel-10.x%20%7C%2011.x%20%7C%2012.x%20%7C%2013.x-FF2D20.svg)](https://laravel.com)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
@@ -20,6 +20,7 @@ A production-ready Laravel package for integrating the **SSLCOMMERZ** payment ga
   - [Refund](#refund)
   - [Query Transaction](#query-transaction)
 - [Callback Handling](#callback-handling)
+  - [Redirect URLs](#redirect-urls-after-payment)
 - [Events](#events)
 - [Hash Verification](#hash-verification)
 - [Custom Controllers](#custom-controllers)
@@ -68,6 +69,9 @@ php artisan vendor:publish --tag=sslcommerz
 Add these variables to your `.env` file:
 
 ```env
+# Your application URL (IMPORTANT: SSLCOMMERZ sends callbacks to this URL)
+APP_URL=https://yourdomain.com
+
 SSLCOMMERZ_SANDBOX=true
 SSLCOMMERZ_STORE_ID=your_store_id
 SSLCOMMERZ_STORE_PASSWORD=your_store_password
@@ -79,6 +83,8 @@ SSLCOMMERZ_REDIRECT_SUCCESS=/payment/success
 SSLCOMMERZ_REDIRECT_FAIL=/payment/fail
 SSLCOMMERZ_REDIRECT_CANCEL=/payment/cancel
 ```
+
+> **⚠️ Important:** `APP_URL` must be set to your publicly accessible domain (e.g. `https://yourdomain.com`). SSLCOMMERZ uses this to send POST callbacks (success, fail, cancel, IPN) to your server. If `APP_URL` is `http://localhost`, callbacks from SSLCOMMERZ will fail in production.
 
 ### Sandbox Test Credentials
 
@@ -276,6 +282,77 @@ The default controller:
 5. Updates the `sslcommerz_transactions` table
 6. Dispatches events
 7. Redirects to configured URLs
+
+### Redirect URLs (After Payment)
+
+After SSLCOMMERZ processes the payment and sends a callback to your server, the package **redirects the user** to a result page. These redirect URLs are configured in `config/sslcommerz.php`:
+
+```php
+'redirect' => [
+    'success' => env('SSLCOMMERZ_REDIRECT_SUCCESS', '/payment/success'),
+    'fail'    => env('SSLCOMMERZ_REDIRECT_FAIL', '/payment/fail'),
+    'cancel'  => env('SSLCOMMERZ_REDIRECT_CANCEL', '/payment/cancel'),
+],
+```
+
+The package ships with **default GET routes** that handle these paths out of the box:
+
+| Route                  | Name                          | Response |
+|------------------------|-------------------------------|----------|
+| GET `/payment/success` | `sslcommerz.redirect.success` | JSON with transaction details |
+| GET `/payment/fail`    | `sslcommerz.redirect.fail`    | JSON with failure info |
+| GET `/payment/cancel`  | `sslcommerz.redirect.cancel`  | JSON with cancellation info |
+
+**Default JSON response example** (`/payment/success`):
+
+```json
+{
+    "success": true,
+    "message": "Payment completed successfully.",
+    "tran_id": "ORDER_6651a3f2e4b01",
+    "status": "VALID"
+}
+```
+
+The transaction data is flashed to the session. You can access it via:
+
+```php
+session('sslcommerz_tran_id')  // Transaction ID
+session('sslcommerz_status')   // Payment status (VALID, FAILED, CANCELLED)
+session('sslcommerz_message')  // Optional message
+```
+
+#### Custom Redirect Pages
+
+To use your own result pages instead of the default JSON responses, define your own routes and update `.env`:
+
+**1. Define your routes:**
+
+```php
+// routes/web.php
+Route::get('/order/thank-you', function () {
+    return view('order.thank-you', [
+        'tran_id' => session('sslcommerz_tran_id'),
+        'status'  => session('sslcommerz_status'),
+    ]);
+});
+
+Route::get('/order/failed', function () {
+    return view('order.failed', [
+        'tran_id' => session('sslcommerz_tran_id'),
+    ]);
+});
+```
+
+**2. Update your `.env`:**
+
+```env
+SSLCOMMERZ_REDIRECT_SUCCESS=/order/thank-you
+SSLCOMMERZ_REDIRECT_FAIL=/order/failed
+SSLCOMMERZ_REDIRECT_CANCEL=/order/failed
+```
+
+> **Note:** When using custom redirect URLs that don't match the default `/payment/*` paths, the package's default routes will still be registered but won't be used. This is harmless.
 
 ---
 
