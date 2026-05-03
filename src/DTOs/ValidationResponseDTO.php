@@ -31,6 +31,14 @@ final readonly class ValidationResponseDTO
         public ?string $apiConnect,
         public ?string $validatedOn,
         public ?string $gwVersion,
+        public ?string $emiInstalment = null,
+        public ?string $emiAmount = null,
+        public ?string $emiDescription = null,
+        public ?string $emiIssuer = null,
+        public ?string $discountAmount = null,
+        public ?string $discountPercentage = null,
+        public ?string $discountRemarks = null,
+        public ?string $campaignCode = null,
         public array   $rawResponse = [],
     ) {
     }
@@ -59,6 +67,14 @@ final readonly class ValidationResponseDTO
             apiConnect: $r['APIConnect'] ?? null,
             validatedOn: $r['validated_on'] ?? null,
             gwVersion: $r['gw_version'] ?? null,
+            emiInstalment: $r['emi_instalment'] ?? null,
+            emiAmount: $r['emi_amount'] ?? null,
+            emiDescription: $r['emi_description'] ?? null,
+            emiIssuer: $r['emi_issuer'] ?? null,
+            discountAmount: $r['discount_amount'] ?? null,
+            discountPercentage: $r['discount_percentage'] ?? null,
+            discountRemarks: $r['discount_remarks'] ?? null,
+            campaignCode: $r['campaign_code'] ?? null,
             rawResponse: $r,
         );
     }

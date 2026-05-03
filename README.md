@@ -191,7 +191,25 @@ $request = PaymentRequestDTO::fromArray([
     'value_a'          => 'order_ref_001',
 ]);
 
+// Specialized Product Profiles (v4)
+$request = PaymentRequestDTO::fromArray([
+    // ... mandatory fields ...
+    'product_profile'  => 'airline-tickets',
+    'pnr'              => 'PNR123',
+    'hours_till_departure' => '24',
+    'flight_type'      => 'Domestic',
+]);
+
 $response = SSLCOMMERZ::initiate($request);
+
+#### Specialized Parameters (API v4)
+
+| Category | Parameters |
+|----------|------------|
+| **Airline** | `pnr`, `hours_till_departure`, `flight_type`, `journey_from_to`, `third_party_booking` |
+| **Travel** | `hotel_name`, `length_of_stay`, `check_in_time`, `hotel_city` |
+| **Telecom** | `product_type`, `topup_number`, `country_topup` |
+| **Logistics**| `logistic_pickup_id`, `logistic_delivery_type` |
 
 if ($response->isSuccessful()) {
     return redirect($response->gatewayPageUrl);

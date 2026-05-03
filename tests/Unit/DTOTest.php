@@ -70,6 +70,37 @@ class DTOTest extends TestCase
     }
 
     /** @test */
+    public function payment_request_dto_supports_v4_specialized_profiles(): void
+    {
+        $dto = PaymentRequestDTO::fromArray([
+            'tran_id'      => 'TXN001',
+            'total_amount' => 100,
+            'cus_name'     => 'Jane',
+            'cus_email'    => 'jane@example.com',
+            'cus_phone'    => '01700000000',
+            'cus_add1'     => 'Dhaka',
+            'cus_city'     => 'Dhaka',
+            'cus_postcode' => '1000',
+            'cus_country'  => 'Bangladesh',
+            'product_name' => 'Tickets',
+            // v4 specialized fields
+            'pnr' => 'PNR123',
+            'hours_till_departure' => '24',
+            'hotel_name' => 'Grand Hotel',
+            'topup_number' => '01700000000',
+            'logistic_pickup_id' => 'PICKUP99',
+        ]);
+
+        $payload = $dto->toApiPayload();
+
+        $this->assertEquals('PNR123', $payload['pnr']);
+        $this->assertEquals('24', $payload['hours_till_departure']);
+        $this->assertEquals('Grand Hotel', $payload['hotel_name']);
+        $this->assertEquals('01700000000', $payload['topup_number']);
+        $this->assertEquals('PICKUP99', $payload['logistic_pickup_id']);
+    }
+
+    /** @test */
     public function payment_response_dto_success(): void
     {
         $dto = PaymentResponseDTO::fromApiResponse([

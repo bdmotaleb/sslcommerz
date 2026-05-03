@@ -57,6 +57,20 @@ final readonly class PaymentRequestDTO
      * @param string|null $failUrl         Override fail callback URL
      * @param string|null $cancelUrl       Override cancel callback URL
      * @param string|null $ipnUrl          Override IPN callback URL
+     * @param string|null $hoursTillDeparture Airline: Hours till departure
+     * @param string|null $flightType      Airline: Flight type
+     * @param string|null $pnr             Airline: PNR
+     * @param string|null $journeyFromTo   Airline: Journey from-to
+     * @param string|null $thirdPartyBooking Airline: Third party booking
+     * @param string|null $hotelName       Travel: Hotel name
+     * @param string|null $lengthOfStay    Travel: Length of stay
+     * @param string|null $checkInTime     Travel: Check-in time
+     * @param string|null $hotelCity       Travel: Hotel city
+     * @param string|null $productType     Telecom: Product type
+     * @param string|null $topupNumber     Telecom: Top-up number
+     * @param string|null $countryTopup    Telecom: Country top-up
+     * @param string|null $logisticPickupId Logistics: Pickup ID
+     * @param string|null $logisticDeliveryType Logistics: Delivery type
      */
     public function __construct(
         public string  $tranId,
@@ -103,6 +117,20 @@ final readonly class PaymentRequestDTO
         public ?string $failUrl = null,
         public ?string $cancelUrl = null,
         public ?string $ipnUrl = null,
+        public ?string $hoursTillDeparture = null,
+        public ?string $flightType = null,
+        public ?string $pnr = null,
+        public ?string $journeyFromTo = null,
+        public ?string $thirdPartyBooking = null,
+        public ?string $hotelName = null,
+        public ?string $lengthOfStay = null,
+        public ?string $checkInTime = null,
+        public ?string $hotelCity = null,
+        public ?string $productType = null,
+        public ?string $topupNumber = null,
+        public ?string $countryTopup = null,
+        public ?string $logisticPickupId = null,
+        public ?string $logisticDeliveryType = null,
     ) {
     }
 
@@ -169,6 +197,20 @@ final readonly class PaymentRequestDTO
             failUrl:          $data['fail_url'] ?? null,
             cancelUrl:        $data['cancel_url'] ?? null,
             ipnUrl:           $data['ipn_url'] ?? null,
+            hoursTillDeparture: $data['hours_till_departure'] ?? null,
+            flightType:       $data['flight_type'] ?? null,
+            pnr:              $data['pnr'] ?? null,
+            journeyFromTo:    $data['journey_from_to'] ?? null,
+            thirdPartyBooking: $data['third_party_booking'] ?? null,
+            hotelName:        $data['hotel_name'] ?? null,
+            lengthOfStay:     $data['length_of_stay'] ?? null,
+            checkInTime:      $data['check_in_time'] ?? null,
+            hotelCity:        $data['hotel_city'] ?? null,
+            productType:      $data['product_type'] ?? null,
+            topupNumber:      $data['topup_number'] ?? null,
+            countryTopup:     $data['country_topup'] ?? null,
+            logisticPickupId: $data['logistic_pickup_id'] ?? null,
+            logisticDeliveryType: $data['logistic_delivery_type'] ?? null,
         );
     }
 
@@ -224,6 +266,24 @@ final readonly class PaymentRequestDTO
             'vat'              => 'vat',
             'discountAmount'   => 'discount_amount',
             'convenienceFee'   => 'convenience_fee',
+            'successUrl'       => 'success_url',
+            'failUrl'          => 'fail_url',
+            'cancelUrl'        => 'cancel_url',
+            'ipnUrl'           => 'ipn_url',
+            'hoursTillDeparture' => 'hours_till_departure',
+            'flightType'       => 'flight_type',
+            'pnr'              => 'pnr',
+            'journeyFromTo'    => 'journey_from_to',
+            'thirdPartyBooking' => 'third_party_booking',
+            'hotelName'        => 'hotel_name',
+            'lengthOfStay'     => 'length_of_stay',
+            'checkInTime'      => 'check_in_time',
+            'hotelCity'        => 'hotel_city',
+            'productType'      => 'product_type',
+            'topupNumber'      => 'topup_number',
+            'countryTopup'     => 'country_topup',
+            'logisticPickupId' => 'logistic_pickup_id',
+            'logisticDeliveryType' => 'logistic_delivery_type',
         ];
 
         foreach ($optionalMappings as $property => $apiKey) {
