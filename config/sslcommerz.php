@@ -25,6 +25,7 @@ return [
     */
     'store_id' => env('SSLCOMMERZ_STORE_ID', ''),
     'store_password' => env('SSLCOMMERZ_STORE_PASSWORD', ''),
+    'salt_key' => env('SSLCOMMERZ_SALT_KEY', ''),
 
     /*
     |--------------------------------------------------------------------------
@@ -52,12 +53,14 @@ return [
             'initiate'    => 'https://sandbox.sslcommerz.com/gwprocess/v4/api.php',
             'validation'  => 'https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php',
             'transaction' => 'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php',
+            'recurring'   => 'https://sandbox.sslcommerz.com/validator/api/v4/',
         ],
         'live' => [
             'base'        => 'https://securepay.sslcommerz.com',
             'initiate'    => 'https://securepay.sslcommerz.com/gwprocess/v4/api.php',
             'validation'  => 'https://securepay.sslcommerz.com/validator/api/validationserverAPI.php',
             'transaction' => 'https://securepay.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php',
+            'recurring'   => 'https://securepay.sslcommerz.com/validator/api/v4/',
         ],
     ],
 

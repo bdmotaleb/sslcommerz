@@ -19,6 +19,8 @@ final readonly class PaymentResponseDTO
         public ?string $storeBanner,
         public ?string $storeLogo,
         public ?string $failedReason,
+        public ?string $subscriptionId = null,
+        public ?string $subscriptionStatus = null,
         public array   $gateways = [],
         public array   $rawResponse = [],
     ) {
@@ -38,6 +40,8 @@ final readonly class PaymentResponseDTO
             storeBanner:        $response['storeBanner'] ?? null,
             storeLogo:          $response['storeLogo'] ?? null,
             failedReason:       $response['failedreason'] ?? null,
+            subscriptionId:     $response['subscription_id'] ?? null,
+            subscriptionStatus: $response['subscription_status'] ?? null,
             gateways:           $response['desc'] ?? [],
             rawResponse:        $response,
         );

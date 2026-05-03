@@ -24,12 +24,14 @@ use Sslcommerz\Laravel\Exceptions\RefundException;
 class SslcommerzService implements PaymentGatewayInterface
 {
     private HashValidator $hashValidator;
+    private EncryptionService $encryption;
 
     public function __construct()
     {
         $this->hashValidator = new HashValidator(
             config('sslcommerz.store_password')
         );
+        $this->encryption = new EncryptionService();
     }
 
     // ---------------------------------------------------------------
@@ -230,6 +232,84 @@ class SslcommerzService implements PaymentGatewayInterface
         $data = $response->json() ?? [];
 
         return RefundResponseDTO::fromApiResponse($data);
+    }
+
+    // ---------------------------------------------------------------
+    //  Recurring Payments
+    // ---------------------------------------------------------------
+
+    /**
+     * Get the current status of a subscription.
+     */
+    public function getSubscriptionStatus(string $refer, string $subscriptionId): array
+    {
+        $this->logInteraction('get_subscription_status', [
+            'refer' => $refer,
+            'subscription_id' => $subscriptionId,
+        ]);
+
+        $response = Http::asForm()->post($this->getEndpoint('recurring'), [
+            'store_id'        => config('sslcommerz.store_id'),
+            'store_passwd'    => config('sslcommerz.store_password'),
+            'refer'           => $refer,
+            'subscription_id' => $subscriptionId,
+            'action'          => 'getSubscriptionStatus',
+        ]);
+
+        return $response->json() ?? [];
+    }
+
+    /**
+     * Disable a recurring subscription.
+     */
+    public function disableSubscription(string $refer, string $subscriptionId): array
+    {
+        return $this->modifySubscription($refer, $subscriptionId, 'disableSubscription');
+    }
+
+    /**
+     * Enable a recurring subscription.
+     */
+    public function enableSubscription(string $refer, string $subscriptionId): array
+    {
+        return $this->modifySubscription($refer, $subscriptionId, 'enableSubscription');
+    }
+
+    /**
+     * Cancel a recurring subscription permanently.
+     */
+    public function cancelSubscription(string $refer, string $subscriptionId): array
+    {
+        return $this->modifySubscription($refer, $subscriptionId, 'cancelSubscription');
+    }
+
+    /**
+     * Modify subscription state.
+     */
+    private function modifySubscription(string $refer, string $subscriptionId, string $action): array
+    {
+        $this->logInteraction($action, [
+            'refer' => $refer,
+            'subscription_id' => $subscriptionId,
+        ]);
+
+        $response = Http::asForm()->post($this->getEndpoint('recurring'), [
+            'store_id'        => config('sslcommerz.store_id'),
+            'store_passwd'    => config('sslcommerz.store_password'),
+            'refer'           => $refer,
+            'subscription_id' => $subscriptionId,
+            'action'          => $action,
+        ]);
+
+        return $response->json() ?? [];
+    }
+
+    /**
+     * Get the encryption service instance.
+     */
+    public function getEncryptionService(): EncryptionService
+    {
+        return $this->encryption;
     }
 
     // ---------------------------------------------------------------

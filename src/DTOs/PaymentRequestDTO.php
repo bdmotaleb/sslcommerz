@@ -71,6 +71,7 @@ final readonly class PaymentRequestDTO
      * @param string|null $countryTopup    Telecom: Country top-up
      * @param string|null $logisticPickupId Logistics: Pickup ID
      * @param string|null $logisticDeliveryType Logistics: Delivery type
+     * @param string|null $schedule        Recurring: Encrypted JSON schedule data
      */
     public function __construct(
         public string  $tranId,
@@ -131,6 +132,7 @@ final readonly class PaymentRequestDTO
         public ?string $countryTopup = null,
         public ?string $logisticPickupId = null,
         public ?string $logisticDeliveryType = null,
+        public ?string $schedule = null,
     ) {
     }
 
@@ -211,6 +213,7 @@ final readonly class PaymentRequestDTO
             countryTopup:     $data['country_topup'] ?? null,
             logisticPickupId: $data['logistic_pickup_id'] ?? null,
             logisticDeliveryType: $data['logistic_delivery_type'] ?? null,
+            schedule:         $data['schedule'] ?? null,
         );
     }
 
@@ -284,6 +287,7 @@ final readonly class PaymentRequestDTO
             'countryTopup'     => 'country_topup',
             'logisticPickupId' => 'logistic_pickup_id',
             'logisticDeliveryType' => 'logistic_delivery_type',
+            'schedule'         => 'schedule',
         ];
 
         foreach ($optionalMappings as $property => $apiKey) {

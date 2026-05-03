@@ -8,6 +8,7 @@ use Sslcommerz\Laravel\DTOs\RefundRequestDTO;
 use Sslcommerz\Laravel\DTOs\RefundResponseDTO;
 use Sslcommerz\Laravel\DTOs\TransactionQueryDTO;
 use Sslcommerz\Laravel\DTOs\ValidationResponseDTO;
+use Sslcommerz\Laravel\Services\EncryptionService;
 
 /**
  * Payment Gateway Contract
@@ -63,4 +64,29 @@ interface PaymentGatewayInterface
      * @return bool True if hash is valid
      */
     public function verifyHash(array $data): bool;
+
+    /**
+     * Get the encryption service for recurring payments.
+     */
+    public function getEncryptionService(): EncryptionService;
+
+    /**
+     * Get subscription status.
+     */
+    public function getSubscriptionStatus(string $refer, string $subscriptionId): array;
+
+    /**
+     * Disable a recurring subscription.
+     */
+    public function disableSubscription(string $refer, string $subscriptionId): array;
+
+    /**
+     * Enable a recurring subscription.
+     */
+    public function enableSubscription(string $refer, string $subscriptionId): array;
+
+    /**
+     * Cancel a recurring subscription permanently.
+     */
+    public function cancelSubscription(string $refer, string $subscriptionId): array;
 }

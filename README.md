@@ -211,6 +211,58 @@ $response = SSLCOMMERZ::initiate($request);
 | **Telecom** | `product_type`, `topup_number`, `country_topup` |
 | **Logistics**| `logistic_pickup_id`, `logistic_delivery_type` |
 
+### Recurring Payments (Easycheckout)
+
+SSLCOMMERZ support recurring payments via a `schedule` parameter. This parameter must be a JSON string encrypted using AES-256-CBC.
+
+**1. Configure SALT Key:**
+Add `SSLCOMMERZ_SALT_KEY` to your `.env` file. This key is provided by the SSLCOMMERZ team.
+
+**2. Initiate Recurring Payment:**
+
+```php
+use Sslcommerz\Laravel\Facades\Sslcommerz;
+use Sslcommerz\Laravel\DTOs\PaymentRequestDTO;
+
+// 1. Prepare schedule data
+$schedule = json_encode([
+    'refer'   => 'REF1234', // Plan ID from Merchant Panel
+    'acct_no' => 'CUS_001',  // Customer account reference
+    'type'    => 'monthly',
+    'dayofmonth' => '24',
+]);
+
+// 2. Encrypt the schedule
+$encryptedSchedule = SSLCOMMERZ::getEncryptionService()->encrypt($schedule);
+
+// 3. Initiate payment
+$request = PaymentRequestDTO::fromArray([
+    // ... mandatory fields ...
+    'total_amount' => 100.00,
+    'schedule'     => $encryptedSchedule,
+]);
+
+$response = SSLCOMMERZ::initiate($request);
+
+if ($response->isSuccessful()) {
+    // If successful, a subscription_id will be returned in the callback/response
+    $subscriptionId = $response->subscriptionId;
+}
+```
+
+**3. Manage Subscriptions:**
+
+```php
+// Check status
+$status = SSLCOMMERZ::getSubscriptionStatus($refer, $subscriptionId);
+
+// Disable temporarily
+SSLCOMMERZ::disableSubscription($refer, $subscriptionId);
+
+// Cancel permanently
+SSLCOMMERZ::cancelSubscription($refer, $subscriptionId);
+```
+
 if ($response->isSuccessful()) {
     return redirect($response->gatewayPageUrl);
 }
@@ -473,7 +525,7 @@ composer install
 use Sslcommerz\Laravel\Facades\Sslcommerz;
 use Sslcommerz\Laravel\DTOs\PaymentResponseDTO;
 
-Sslcommerz::shouldReceive('initiate')
+SSLCOMMERZ::shouldReceive('initiate')
     ->once()
     ->andReturn(PaymentResponseDTO::fromApiResponse([
         'status'         => 'SUCCESS',
