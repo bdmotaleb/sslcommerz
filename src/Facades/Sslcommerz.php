@@ -1,0 +1,35 @@
+<?php
+
+namespace Sslcommerz\Laravel\Facades;
+
+use Illuminate\Support\Facades\Facade;
+use Sslcommerz\Laravel\Contracts\PaymentGatewayInterface;
+use Sslcommerz\Laravel\DTOs\PaymentRequestDTO;
+use Sslcommerz\Laravel\DTOs\PaymentResponseDTO;
+use Sslcommerz\Laravel\DTOs\RefundRequestDTO;
+use Sslcommerz\Laravel\DTOs\RefundResponseDTO;
+use Sslcommerz\Laravel\DTOs\TransactionQueryDTO;
+use Sslcommerz\Laravel\DTOs\ValidationResponseDTO;
+
+/**
+ * SSLCOMMERZ Facade
+ *
+ * Provides a clean, expressive API for interacting with the SSLCOMMERZ gateway.
+ *
+ * @method static PaymentResponseDTO initiate(PaymentRequestDTO $request)
+ * @method static ValidationResponseDTO validate(string $valId)
+ * @method static RefundResponseDTO refund(RefundRequestDTO $request)
+ * @method static TransactionQueryDTO queryTransaction(string $tranId)
+ * @method static ValidationResponseDTO queryBySession(string $sessionKey)
+ * @method static RefundResponseDTO queryRefundStatus(string $refundRefId)
+ * @method static bool verifyHash(array $data)
+ *
+ * @see \Sslcommerz\Laravel\Services\SslcommerzService
+ */
+class Sslcommerz extends Facade
+{
+    protected static function getFacadeAccessor(): string
+    {
+        return PaymentGatewayInterface::class;
+    }
+}
