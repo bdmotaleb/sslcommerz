@@ -11,7 +11,6 @@ use Sslcommerz\Laravel\Events\IpnReceived;
 use Sslcommerz\Laravel\Events\PaymentCancelled;
 use Sslcommerz\Laravel\Events\PaymentFailed;
 use Sslcommerz\Laravel\Events\PaymentSucceeded;
-use Sslcommerz\Laravel\Models\SslcommerzTransaction;
 
 /**
  * Default SSLCOMMERZ Callback Controller
@@ -36,15 +35,6 @@ class SslcommerzCallbackController extends Controller
 
         $this->logCallback('success', $callback);
 
-        // Find the transaction record
-        $transaction = SslcommerzTransaction::where('tran_id', $callback->tranId)->first();
-
-        // Prevent duplicate processing
-        if ($transaction && $transaction->isAlreadyProcessed()) {
-            return redirect(config('sslcommerz.redirect.success'))
-                ->with('sslcommerz_tran_id', $callback->tranId)
-                ->with('sslcommerz_message', 'Transaction already processed.');
-        }
 
         // Validate the transaction with SSLCOMMERZ API
         $validation = null;
@@ -60,23 +50,6 @@ class SslcommerzCallbackController extends Controller
             }
         }
 
-        // Update transaction record
-        if ($transaction) {
-            $transaction->update([
-                'status'              => $validation?->status ?? $callback->status,
-                'val_id'              => $callback->valId,
-                'bank_tran_id'        => $callback->bankTranId,
-                'store_amount'        => $callback->storeAmount,
-                'card_type'           => $callback->cardType,
-                'card_no'             => $callback->cardNo,
-                'card_brand'          => $callback->cardBrand,
-                'card_issuer'         => $callback->cardIssuer,
-                'risk_level'          => (int) ($callback->riskLevel ?? 0),
-                'callback_payload'    => $callback->rawData,
-                'validation_payload'  => $validation?->rawResponse,
-                'validated_at'        => $validation ? now() : null,
-            ]);
-        }
 
         // Dispatch event
         if ($validation) {
@@ -97,15 +70,6 @@ class SslcommerzCallbackController extends Controller
 
         $this->logCallback('fail', $callback);
 
-        $transaction = SslcommerzTransaction::where('tran_id', $callback->tranId)->first();
-
-        if ($transaction && ! $transaction->isAlreadyProcessed()) {
-            $transaction->update([
-                'status'           => 'FAILED',
-                'bank_tran_id'     => $callback->bankTranId,
-                'callback_payload' => $callback->rawData,
-            ]);
-        }
 
         event(new PaymentFailed($callback));
 
@@ -123,14 +87,6 @@ class SslcommerzCallbackController extends Controller
 
         $this->logCallback('cancel', $callback);
 
-        $transaction = SslcommerzTransaction::where('tran_id', $callback->tranId)->first();
-
-        if ($transaction && ! $transaction->isAlreadyProcessed()) {
-            $transaction->update([
-                'status'           => 'CANCELLED',
-                'callback_payload' => $callback->rawData,
-            ]);
-        }
 
         event(new PaymentCancelled($callback));
 
@@ -158,12 +114,6 @@ class SslcommerzCallbackController extends Controller
             return response('INVALID HASH', 403);
         }
 
-        $transaction = SslcommerzTransaction::where('tran_id', $callback->tranId)->first();
-
-        // Prevent duplicate processing
-        if ($transaction && $transaction->isAlreadyProcessed()) {
-            return response('ALREADY PROCESSED', 200);
-        }
 
         // Validate with SSLCOMMERZ API
         $validation = null;
@@ -179,28 +129,6 @@ class SslcommerzCallbackController extends Controller
             }
         }
 
-        // Update transaction record
-        if ($transaction) {
-            $updateData = [
-                'status'           => $validation?->status ?? $callback->status,
-                'val_id'           => $callback->valId,
-                'bank_tran_id'     => $callback->bankTranId,
-                'store_amount'     => $callback->storeAmount,
-                'card_type'        => $callback->cardType,
-                'card_no'          => $callback->cardNo,
-                'card_brand'       => $callback->cardBrand,
-                'card_issuer'      => $callback->cardIssuer,
-                'risk_level'       => (int) ($callback->riskLevel ?? 0),
-                'callback_payload' => $callback->rawData,
-            ];
-
-            if ($validation) {
-                $updateData['validation_payload'] = $validation->rawResponse;
-                $updateData['validated_at'] = now();
-            }
-
-            $transaction->update($updateData);
-        }
 
         // Dispatch event
         event(new IpnReceived($callback, $validation));

@@ -43,12 +43,6 @@ composer require sslcommerz/laravel
 php artisan vendor:publish --tag=sslcommerz-config
 ```
 
-### Publish Migrations
-
-```bash
-php artisan vendor:publish --tag=sslcommerz-migrations
-php artisan migrate
-```
 
 ### Publish Routes (Optional)
 
@@ -278,10 +272,8 @@ The default controller:
 1. Parses callback data into a `CallbackDTO`
 2. Verifies hash integrity (IPN)
 3. Validates via SSLCOMMERZ API
-4. Prevents duplicate processing
-5. Updates the `sslcommerz_transactions` table
-6. Dispatches events
-7. Redirects to configured URLs
+4. Dispatches events
+5. Redirects to configured URLs
 
 ### Redirect URLs (After Payment)
 
@@ -381,15 +373,26 @@ protected $listen = [
 ];
 ```
 
+### Persistence (Handling Orders)
+
+Since this package is database-agnostic, you should handle transaction persistence in your own application using listeners.
+
 **Example Listener:**
 
 ```php
+namespace App\Listeners;
+
+use Sslcommerz\Laravel\Events\PaymentSucceeded;
+use App\Models\Order;
+
 class UpdateOrderStatus
 {
     public function handle(PaymentSucceeded $event): void
     {
+        // Access callback data via $event->payment
+        // Access API validation data via $event->validation
+        
         $tranId = $event->payment->tranId;
-        $amount = $event->validation->amount;
         $orderId = $event->payment->valueA; // Your custom reference
 
         Order::where('id', $orderId)->update([
@@ -501,10 +504,9 @@ This package implements multiple layers of security:
 
 1. **Hash Verification**: All IPN callbacks are verified using SSLCOMMERZ's MD5 signature algorithm
 2. **API Validation**: Every successful payment is validated server-side via the Order Validation API
-3. **Duplicate Prevention**: Transactions are tracked in the database; already-processed transactions are not reprocessed
-4. **CSRF Exemption**: Only callback routes from SSLCOMMERZ are CSRF-exempt
-5. **Logging**: All gateway interactions are logged for audit trails
-6. **Environment Isolation**: Separate endpoints for sandbox and production
+3. **CSRF Exemption**: Only callback routes from SSLCOMMERZ are CSRF-exempt
+4. **Logging**: All gateway interactions are logged for audit trails
+5. **Environment Isolation**: Separate endpoints for sandbox and production
 
 ### Best Practices
 

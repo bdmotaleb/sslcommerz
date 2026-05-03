@@ -49,13 +49,6 @@ class SslcommerzServiceTest extends TestCase
         $this->assertEquals('SUCCESS', $response->status);
         $this->assertEquals('ABC123SESSION', $response->sessionKey);
         $this->assertNotEmpty($response->gatewayPageUrl);
-
-        // Verify transaction was recorded in database
-        $this->assertDatabaseHas('sslcommerz_transactions', [
-            'tran_id' => 'TEST_TXN_001',
-            'status'  => 'INITIATED',
-            'amount'  => 100.00,
-        ]);
     }
 
     /** @test */

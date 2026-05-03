@@ -56,10 +56,6 @@ class SslcommerzServiceProvider extends ServiceProvider
             __DIR__ . '/../config/sslcommerz.php' => config_path('sslcommerz.php'),
         ], 'sslcommerz-config');
 
-        // Publish migrations
-        $this->publishes([
-            __DIR__ . '/../database/migrations/' => database_path('migrations'),
-        ], 'sslcommerz-migrations');
 
         // Publish routes
         $this->publishes([
@@ -69,7 +65,6 @@ class SslcommerzServiceProvider extends ServiceProvider
         // Publish everything
         $this->publishes([
             __DIR__ . '/../config/sslcommerz.php'  => config_path('sslcommerz.php'),
-            __DIR__ . '/../database/migrations/'   => database_path('migrations'),
             __DIR__ . '/../routes/sslcommerz.php'   => base_path('routes/sslcommerz.php'),
         ], 'sslcommerz');
     }

@@ -14,7 +14,6 @@ use Sslcommerz\Laravel\DTOs\ValidationResponseDTO;
 use Sslcommerz\Laravel\Exceptions\PaymentInitiationException;
 use Sslcommerz\Laravel\Exceptions\PaymentValidationException;
 use Sslcommerz\Laravel\Exceptions\RefundException;
-use Sslcommerz\Laravel\Models\SslcommerzTransaction;
 
 /**
  * SSLCOMMERZ Service
@@ -77,19 +76,6 @@ class SslcommerzService implements PaymentGatewayInterface
             throw PaymentInitiationException::fromResponse($data);
         }
 
-        // Record the transaction in the database
-        SslcommerzTransaction::create([
-            'tran_id'          => $request->tranId,
-            'session_key'      => $dto->sessionKey,
-            'amount'           => $request->totalAmount,
-            'currency'         => $request->currency,
-            'status'           => 'INITIATED',
-            'gateway_page_url' => $dto->gatewayPageUrl,
-            'value_a'          => $request->valueA,
-            'value_b'          => $request->valueB,
-            'value_c'          => $request->valueC,
-            'value_d'          => $request->valueD,
-        ]);
 
         $this->logInteraction('initiate_success', [
             'tran_id'     => $request->tranId,

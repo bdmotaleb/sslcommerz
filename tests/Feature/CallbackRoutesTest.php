@@ -8,7 +8,6 @@ use Sslcommerz\Laravel\Events\IpnReceived;
 use Sslcommerz\Laravel\Events\PaymentCancelled;
 use Sslcommerz\Laravel\Events\PaymentFailed;
 use Sslcommerz\Laravel\Events\PaymentSucceeded;
-use Sslcommerz\Laravel\Models\SslcommerzTransaction;
 use Sslcommerz\Laravel\Tests\TestCase;
 
 class CallbackRoutesTest extends TestCase
@@ -34,13 +33,6 @@ class CallbackRoutesTest extends TestCase
             ]),
         ]);
 
-        // Create a pending transaction
-        SslcommerzTransaction::create([
-            'tran_id'  => 'TXN_SUCCESS_001',
-            'amount'   => 100.00,
-            'currency' => 'BDT',
-            'status'   => 'INITIATED',
-        ]);
 
         $response = $this->post(route('sslcommerz.success'), [
             'status'       => 'VALID',
@@ -54,11 +46,6 @@ class CallbackRoutesTest extends TestCase
 
         $response->assertRedirect(config('sslcommerz.redirect.success'));
 
-        // Verify transaction was updated
-        $this->assertDatabaseHas('sslcommerz_transactions', [
-            'tran_id' => 'TXN_SUCCESS_001',
-            'status'  => 'VALID',
-        ]);
 
         Event::assertDispatched(PaymentSucceeded::class);
     }
@@ -66,12 +53,6 @@ class CallbackRoutesTest extends TestCase
     /** @test */
     public function fail_route_dispatches_event(): void
     {
-        SslcommerzTransaction::create([
-            'tran_id'  => 'TXN_FAIL_001',
-            'amount'   => 100.00,
-            'currency' => 'BDT',
-            'status'   => 'INITIATED',
-        ]);
 
         $response = $this->post(route('sslcommerz.fail'), [
             'status'  => 'FAILED',
@@ -80,10 +61,6 @@ class CallbackRoutesTest extends TestCase
 
         $response->assertRedirect(config('sslcommerz.redirect.fail'));
 
-        $this->assertDatabaseHas('sslcommerz_transactions', [
-            'tran_id' => 'TXN_FAIL_001',
-            'status'  => 'FAILED',
-        ]);
 
         Event::assertDispatched(PaymentFailed::class);
     }
@@ -91,12 +68,6 @@ class CallbackRoutesTest extends TestCase
     /** @test */
     public function cancel_route_dispatches_event(): void
     {
-        SslcommerzTransaction::create([
-            'tran_id'  => 'TXN_CANCEL_001',
-            'amount'   => 100.00,
-            'currency' => 'BDT',
-            'status'   => 'INITIATED',
-        ]);
 
         $response = $this->post(route('sslcommerz.cancel'), [
             'status'  => 'CANCELLED',
@@ -105,10 +76,6 @@ class CallbackRoutesTest extends TestCase
 
         $response->assertRedirect(config('sslcommerz.redirect.cancel'));
 
-        $this->assertDatabaseHas('sslcommerz_transactions', [
-            'tran_id' => 'TXN_CANCEL_001',
-            'status'  => 'CANCELLED',
-        ]);
 
         Event::assertDispatched(PaymentCancelled::class);
     }
@@ -126,12 +93,6 @@ class CallbackRoutesTest extends TestCase
             ]),
         ]);
 
-        SslcommerzTransaction::create([
-            'tran_id'  => 'TXN_IPN_001',
-            'amount'   => 200.00,
-            'currency' => 'BDT',
-            'status'   => 'INITIATED',
-        ]);
 
         // Build valid hash data
         $data = $this->buildIpnData('TXN_IPN_001', '200.00', 'VALID');
@@ -159,27 +120,6 @@ class CallbackRoutesTest extends TestCase
         Event::assertNotDispatched(IpnReceived::class);
     }
 
-    /** @test */
-    public function duplicate_transaction_is_not_reprocessed(): void
-    {
-        SslcommerzTransaction::create([
-            'tran_id'  => 'TXN_DUP_001',
-            'amount'   => 100.00,
-            'currency' => 'BDT',
-            'status'   => 'VALID', // Already processed
-        ]);
-
-        $response = $this->post(route('sslcommerz.success'), [
-            'status'  => 'VALID',
-            'tran_id' => 'TXN_DUP_001',
-            'val_id'  => 'VAL_DUP',
-        ]);
-
-        $response->assertRedirect(config('sslcommerz.redirect.success'));
-
-        // Should NOT dispatch another event
-        Event::assertNotDispatched(PaymentSucceeded::class);
-    }
 
     // ---------------------------------------------------------------
     //  Helper
