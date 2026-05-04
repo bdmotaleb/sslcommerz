@@ -15,9 +15,9 @@ use Sslcommerz\Laravel\Services\EncryptionService;
 /**
  * SSLCOMMERZ Facade
  * Provides a clean, expressive API for interacting with the SSLCOMMERZ gateway.
- * @method static PaymentResponseDTO initiate(PaymentRequestDTO $request)
+ * @method static PaymentResponseDTO initiate(PaymentRequestDTO|array $request)
  * @method static ValidationResponseDTO validate(string $valId)
- * @method static RefundResponseDTO refund(RefundRequestDTO $request)
+ * @method static RefundResponseDTO refund(RefundRequestDTO|array $request)
  * @method static TransactionQueryDTO queryTransaction(string $tranId)
  * @method static ValidationResponseDTO queryBySession(string $sessionKey)
  * @method static RefundResponseDTO queryRefundStatus(string $refundRefId)
@@ -30,7 +30,7 @@ use Sslcommerz\Laravel\Services\EncryptionService;
  *
  * @see \Sslcommerz\Laravel\Services\SslcommerzService
  */
-class Sslcommerz extends Facade
+class SSLCOMMERZ extends Facade
 {
     protected static function getFacadeAccessor(): string
     {

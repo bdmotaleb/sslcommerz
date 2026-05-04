@@ -9,6 +9,11 @@
         "bangladesh",
         "bdt"
     ],
+    "homepage": "https://github.com/sslcommerz/SSLCommerz-Laravel",
+    "support": {
+        "issues": "https://github.com/sslcommerz/SSLCommerz-Laravel/issues",
+        "source": "https://github.com/sslcommerz/SSLCommerz-Laravel"
+    },
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -44,7 +49,7 @@
                 "Sslcommerz\\Laravel\\SslcommerzServiceProvider"
             ],
             "aliases": {
-                "SSLCOMMERZ": "Sslcommerz\\Laravel\\Facades\\Sslcommerz"
+                "SSLCOMMERZ": "Sslcommerz\\Laravel\\Facades\\SSLCOMMERZ"
             }
         }
     },

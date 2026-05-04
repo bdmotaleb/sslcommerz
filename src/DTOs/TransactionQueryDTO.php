@@ -2,13 +2,20 @@
 
 namespace Sslcommerz\Laravel\DTOs;
 
+use ArrayAccess;
+use JsonSerializable;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Jsonable;
+
 /**
  * Transaction Query DTO
  *
  * Wraps the response from querying transaction status by tran_id or sessionkey.
  */
-final readonly class TransactionQueryDTO
+final readonly class TransactionQueryDTO implements ArrayAccess, JsonSerializable, Arrayable, Jsonable
 {
+    use ArrayableDTO;
+
     public function __construct(
         public string $apiConnect,
         public int    $numberOfTransactions,

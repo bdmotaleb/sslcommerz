@@ -17,7 +17,7 @@ abstract class TestCase extends BaseTestCase
     protected function getPackageAliases($app): array
     {
         return [
-            'SSLCOMMERZ' => \Sslcommerz\Laravel\Facades\Sslcommerz::class,
+            'SSLCOMMERZ' => \Sslcommerz\Laravel\Facades\SSLCOMMERZ::class,
         ];
     }
 
@@ -35,10 +35,5 @@ abstract class TestCase extends BaseTestCase
             'database' => ':memory:',
             'prefix'   => '',
         ]);
-    }
-
-    protected function defineDatabaseMigrations(): void
-    {
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
     }
 }

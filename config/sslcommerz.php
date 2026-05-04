@@ -91,9 +91,9 @@ return [
     |
     */
     'redirect' => [
-        'success' => env('SSLCOMMERZ_REDIRECT_SUCCESS', '/payment/success'),
-        'fail'    => env('SSLCOMMERZ_REDIRECT_FAIL', '/payment/fail'),
-        'cancel'  => env('SSLCOMMERZ_REDIRECT_CANCEL', '/payment/cancel'),
+        'success' => env('SSLCOMMERZ_SUCCESS', '/payment/success'),
+        'fail'    => env('SSLCOMMERZ_FAIL', '/payment/fail'),
+        'cancel'  => env('SSLCOMMERZ_CANCEL', '/payment/cancel'),
     ],
 
     /*

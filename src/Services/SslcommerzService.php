@@ -41,50 +41,60 @@ class SslcommerzService implements PaymentGatewayInterface
     /**
      * {@inheritDoc}
      */
-    public function initiate(PaymentRequestDTO $request): PaymentResponseDTO
+    public function initiate(PaymentRequestDTO|array $request): PaymentResponseDTO
     {
-        $payload = $this->buildInitiationPayload($request);
+        try {
+            if (is_array($request)) {
+                $request = PaymentRequestDTO::fromArray($request);
+            }
 
-        $this->logInteraction('initiate', [
-            'tran_id' => $request->tranId,
-            'amount'  => $request->totalAmount,
-        ]);
+            $payload = $this->buildInitiationPayload($request);
 
-        $response = Http::asForm()
-            ->timeout(30)
-            ->connectTimeout(30)
-            ->post($this->getEndpoint('initiate'), $payload);
-
-        if (! $response->successful()) {
-            $this->logInteraction('initiate_failed', [
-                'status' => $response->status(),
-                'body'   => $response->body(),
+            $this->logInteraction('initiate', [
+                'tran_id' => $request->tranId,
+                'amount'  => $request->totalAmount,
             ]);
-            throw PaymentInitiationException::connectionFailed(
-                "HTTP {$response->status()}"
-            );
+
+            $response = Http::asForm()
+                ->timeout(30)
+                ->connectTimeout(30)
+                ->post($this->getEndpoint('initiate'), $payload);
+
+            if (! $response->successful()) {
+                $this->logInteraction('initiate_failed', [
+                    'status' => $response->status(),
+                    'body'   => $response->body(),
+                ]);
+                return PaymentResponseDTO::failed("HTTP {$response->status()}: Connection failed");
+            }
+
+            $data = $response->json();
+
+            if (empty($data) || ! is_array($data)) {
+                return PaymentResponseDTO::failed('Invalid JSON response from gateway');
+            }
+
+            $dto = PaymentResponseDTO::fromApiResponse($data);
+
+            if (! $dto->isSuccessful()) {
+                $this->logInteraction('initiate_failed', $data);
+                return $dto;
+            }
+
+
+            $this->logInteraction('initiate_success', [
+                'tran_id'     => $request->tranId,
+                'session_key' => $dto->sessionKey,
+            ]);
+
+            return $dto;
+
+        } catch (\Exception $e) {
+            $this->logInteraction('initiate_exception', [
+                'message' => $e->getMessage(),
+            ]);
+            return PaymentResponseDTO::failed($e->getMessage());
         }
-
-        $data = $response->json();
-
-        if (empty($data) || ! is_array($data)) {
-            throw PaymentInitiationException::connectionFailed('Invalid JSON response');
-        }
-
-        $dto = PaymentResponseDTO::fromApiResponse($data);
-
-        if (! $dto->isSuccessful()) {
-            $this->logInteraction('initiate_failed', $data);
-            throw PaymentInitiationException::fromResponse($data);
-        }
-
-
-        $this->logInteraction('initiate_success', [
-            'tran_id'     => $request->tranId,
-            'session_key' => $dto->sessionKey,
-        ]);
-
-        return $dto;
     }
 
     // ---------------------------------------------------------------
@@ -130,39 +140,49 @@ class SslcommerzService implements PaymentGatewayInterface
     /**
      * {@inheritDoc}
      */
-    public function refund(RefundRequestDTO $request): RefundResponseDTO
+    public function refund(RefundRequestDTO|array $request): RefundResponseDTO
     {
-        $this->logInteraction('refund', [
-            'bank_tran_id'  => $request->bankTranId,
-            'refund_amount' => $request->refundAmount,
-        ]);
+        try {
+            if (is_array($request)) {
+                $request = RefundRequestDTO::fromArray($request);
+            }
 
-        $params = array_merge($request->toApiPayload(), [
-            'store_id'     => config('sslcommerz.store_id'),
-            'store_passwd' => config('sslcommerz.store_password'),
-            'v'            => '1',
-            'format'       => 'json',
-        ]);
-
-        $response = Http::timeout(30)
-            ->connectTimeout(30)
-            ->get($this->getEndpoint('transaction'), $params);
-
-        if (! $response->successful()) {
-            throw RefundException::fromResponse([
-                'errorReason' => "HTTP {$response->status()}",
+            $this->logInteraction('refund', [
+                'bank_tran_id'  => $request->bankTranId,
+                'refund_amount' => $request->refundAmount,
             ]);
+
+            $params = array_merge($request->toApiPayload(), [
+                'store_id'     => config('sslcommerz.store_id'),
+                'store_passwd' => config('sslcommerz.store_password'),
+                'v'            => '1',
+                'format'       => 'json',
+            ]);
+
+            $response = Http::timeout(30)
+                ->connectTimeout(30)
+                ->get($this->getEndpoint('transaction'), $params);
+
+            if (! $response->successful()) {
+                return RefundResponseDTO::failed("HTTP {$response->status()}: Connection failed");
+            }
+
+            $data = $response->json();
+            $dto = RefundResponseDTO::fromApiResponse($data);
+
+            $this->logInteraction('refund_result', [
+                'status'        => $dto->status,
+                'refund_ref_id' => $dto->refundRefId,
+            ]);
+
+            return $dto;
+
+        } catch (\Exception $e) {
+            $this->logInteraction('refund_exception', [
+                'message' => $e->getMessage(),
+            ]);
+            return RefundResponseDTO::failed($e->getMessage());
         }
-
-        $data = $response->json();
-        $dto = RefundResponseDTO::fromApiResponse($data);
-
-        $this->logInteraction('refund_result', [
-            'status'        => $dto->status,
-            'refund_ref_id' => $dto->refundRefId,
-        ]);
-
-        return $dto;
     }
 
     // ---------------------------------------------------------------

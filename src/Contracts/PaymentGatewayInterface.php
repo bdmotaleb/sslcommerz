@@ -22,12 +22,12 @@ interface PaymentGatewayInterface
     /**
      * Initiate a payment session with the gateway.
      *
-     * @param PaymentRequestDTO $request Payment details
+     * @param PaymentRequestDTO|array $request Payment details (DTO or associative array)
      * @return PaymentResponseDTO Gateway response with redirect URL
      *
      * @throws \Sslcommerz\Laravel\Exceptions\PaymentInitiationException
      */
-    public function initiate(PaymentRequestDTO $request): PaymentResponseDTO;
+    public function initiate(PaymentRequestDTO|array $request): PaymentResponseDTO;
 
     /**
      * Validate a completed transaction using the validation ID.
@@ -42,12 +42,12 @@ interface PaymentGatewayInterface
     /**
      * Initiate a refund for a previously successful transaction.
      *
-     * @param RefundRequestDTO $request Refund details
+     * @param RefundRequestDTO|array $request Refund details (DTO or associative array)
      * @return RefundResponseDTO Refund result
      *
      * @throws \Sslcommerz\Laravel\Exceptions\RefundException
      */
-    public function refund(RefundRequestDTO $request): RefundResponseDTO;
+    public function refund(RefundRequestDTO|array $request): RefundResponseDTO;
 
     /**
      * Query transaction status by merchant transaction ID.

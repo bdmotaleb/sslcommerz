@@ -41,9 +41,28 @@ class DTOTest extends TestCase
     public function payment_request_dto_throws_on_missing_fields(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('tran_id');
+        $this->expectExceptionMessage('cus_name');
 
         PaymentRequestDTO::fromArray(['total_amount' => 100]);
+    }
+
+    /** @test */
+    public function payment_request_dto_auto_generates_tran_id(): void
+    {
+        $dto = PaymentRequestDTO::fromArray([
+            'total_amount' => 100,
+            'cus_name'     => 'John',
+            'cus_email'    => 'john@example.com',
+            'cus_phone'    => '01700000000',
+            'cus_add1'     => 'Dhaka',
+            'cus_city'     => 'Dhaka',
+            'cus_postcode' => '1200',
+        ]);
+
+        $this->assertNotNull($dto->tranId);
+        $this->assertStringStartsWith('SSL', $dto->tranId);
+        $this->assertEquals('Bangladesh', $dto->cusCountry);
+        $this->assertEquals('Payment', $dto->productName);
     }
 
     /** @test */

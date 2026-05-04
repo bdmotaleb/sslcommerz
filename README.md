@@ -73,9 +73,9 @@ SSLCOMMERZ_CURRENCY=BDT
 SSLCOMMERZ_LOG_ENABLED=true
 
 # Redirect URLs after payment processing
-SSLCOMMERZ_REDIRECT_SUCCESS=/payment/success
-SSLCOMMERZ_REDIRECT_FAIL=/payment/fail
-SSLCOMMERZ_REDIRECT_CANCEL=/payment/cancel
+SSLCOMMERZ_SUCCESS=/payment/success
+SSLCOMMERZ_FAIL=/payment/fail
+SSLCOMMERZ_CANCEL=/payment/cancel
 ```
 
 > **⚠️ Important:** `APP_URL` must be set to your publicly accessible domain (e.g. `https://yourdomain.com`). SSLCOMMERZ uses this to send POST callbacks (success, fail, cancel, IPN) to your server. If `APP_URL` is `http://localhost`, callbacks from SSLCOMMERZ will fail in production.
@@ -88,9 +88,9 @@ Register at [https://developer.sslcommerz.com/registration/](https://developer.s
 
 | Card Type   | Number             | Expiry | CVV |
 |------------|-------------------|--------|-----|
-| VISA       | 4111111111111111  | 12/26  | 111 |
-| Mastercard | 5111111111111111  | 12/26  | 111 |
-| Amex       | 371111111111111   | 12/26  | 111 |
+| VISA       | 4111111111111111  | 12/36  | 111 |
+| Mastercard | 5111111111111111  | 12/36  | 111 |
+| Amex       | 371111111111111   | 12/36   | 111 |
 
 **Mobile OTP:** `111111` or `123456`
 
@@ -99,31 +99,26 @@ Register at [https://developer.sslcommerz.com/registration/](https://developer.s
 ## Quick Start
 
 ```php
-use Sslcommerz\Laravel\Facades\Sslcommerz;
-use Sslcommerz\Laravel\DTOs\PaymentRequestDTO;
+use Sslcommerz\Laravel\Facades\SSLCOMMERZ;
 
 // In your controller
 public function checkout(Request $request)
 {
-    $paymentRequest = PaymentRequestDTO::fromArray([
+    // Simply pass an array of parameters to initiate payment
+    $response = SSLCOMMERZ::initiate([
         'tran_id'      => 'ORDER_' . uniqid(),
         'total_amount' => 1500.00,
-        'currency'     => 'BDT',
         'cus_name'     => $request->name,
         'cus_email'    => $request->email,
-        'cus_phone'    => $request->phone,
-        'cus_add1'     => $request->address,
-        'cus_city'     => $request->city,
-        'cus_postcode' => $request->postcode,
-        'cus_country'  => 'Bangladesh',
-        'product_name' => 'Premium Subscription',
-        'value_a'      => $order->id, // Custom reference
+        // ... other parameters as needed ...
     ]);
 
-    $response = SSLCOMMERZ::initiate($paymentRequest);
+    // Check if initiation was successful
+    if ($response->isSuccessful()) {
+        return $response->redirect(); // Fluent redirect to SSLCOMMERZ
+    }
 
-    // Redirect to SSLCOMMERZ payment page
-    return redirect($response->gatewayPageUrl);
+    return back()->with('error', $response->failedReason);
 }
 ```
 
@@ -167,40 +162,23 @@ public function checkout(Request $request)
 
 ### Initiate Payment
 
-**Using Facade:**
-
 ```php
-use Sslcommerz\Laravel\Facades\Sslcommerz;
-use Sslcommerz\Laravel\DTOs\PaymentRequestDTO;
+use Sslcommerz\Laravel\Facades\SSLCOMMERZ;
 
-$request = PaymentRequestDTO::fromArray([
-    'tran_id'          => 'ORDER_001',
+$response = SSLCOMMERZ::initiate([
+    'tran_id'          => 'ORDER_' . uniqid(),
     'total_amount'     => 1000.00,
-    'currency'         => 'BDT',
     'cus_name'         => 'John Doe',
     'cus_email'        => 'john@example.com',
     'cus_phone'        => '01711111111',
-    'cus_add1'         => 'Dhaka',
-    'cus_city'         => 'Dhaka',
-    'cus_postcode'     => '1000',
-    'cus_country'      => 'Bangladesh',
-    'product_name'     => 'Widget Pack',
-    'product_category' => 'electronics',
-    'product_profile'  => 'physical-goods',
-    'shipping_method'  => 'Courier',
-    'value_a'          => 'order_ref_001',
+    // ... other parameters as needed ...
 ]);
 
-// Specialized Product Profiles (v4)
-$request = PaymentRequestDTO::fromArray([
-    // ... mandatory fields ...
-    'product_profile'  => 'airline-tickets',
-    'pnr'              => 'PNR123',
-    'hours_till_departure' => '24',
-    'flight_type'      => 'Domestic',
-]);
-
-$response = SSLCOMMERZ::initiate($request);
+// Response behaves like an array and an object
+if ($response['status'] === 'SUCCESS') {
+    return $response->redirect();
+}
+```
 
 #### Specialized Parameters (API v4)
 
@@ -213,7 +191,7 @@ $response = SSLCOMMERZ::initiate($request);
 
 ### Recurring Payments (Easycheckout)
 
-SSLCOMMERZ support recurring payments via a `schedule` parameter. This parameter must be a JSON string encrypted using AES-256-CBC.
+SSLCOMMERZ support recurring payments via a `schedule` parameter.
 
 **1. Configure SALT Key:**
 Add `SSLCOMMERZ_SALT_KEY` to your `.env` file. This key is provided by the SSLCOMMERZ team.
@@ -221,8 +199,7 @@ Add `SSLCOMMERZ_SALT_KEY` to your `.env` file. This key is provided by the SSLCO
 **2. Initiate Recurring Payment:**
 
 ```php
-use Sslcommerz\Laravel\Facades\Sslcommerz;
-use Sslcommerz\Laravel\DTOs\PaymentRequestDTO;
+use Sslcommerz\Laravel\Facades\SSLCOMMERZ;
 
 // 1. Prepare schedule data
 $schedule = json_encode([
@@ -236,13 +213,10 @@ $schedule = json_encode([
 $encryptedSchedule = SSLCOMMERZ::getEncryptionService()->encrypt($schedule);
 
 // 3. Initiate payment
-$request = PaymentRequestDTO::fromArray([
+$response = SSLCOMMERZ::initiate([
     // ... mandatory fields ...
-    'total_amount' => 100.00,
     'schedule'     => $encryptedSchedule,
 ]);
-
-$response = SSLCOMMERZ::initiate($request);
 
 if ($response->isSuccessful()) {
     // If successful, a subscription_id will be returned in the callback/response
@@ -263,35 +237,14 @@ SSLCOMMERZ::disableSubscription($refer, $subscriptionId);
 SSLCOMMERZ::cancelSubscription($refer, $subscriptionId);
 ```
 
-if ($response->isSuccessful()) {
-    return redirect($response->gatewayPageUrl);
-}
-```
-
-**Using Dependency Injection:**
-
-```php
-use Sslcommerz\Laravel\Contracts\PaymentGatewayInterface;
-
-public function __construct(
-    private PaymentGatewayInterface $gateway,
-) {}
-
-public function pay()
-{
-    $response = $this->gateway->initiate($request);
-    return redirect($response->gatewayPageUrl);
-}
-```
-
 ### Validate Transaction
 
 ```php
 $validation = SSLCOMMERZ::validate($valId);
 
 if ($validation->isSuccessful()) {
-    // Payment confirmed
-    echo "Amount: " . $validation->amount;
+    // Payment confirmed - access via array or object
+    echo "Amount: " . $validation['amount'];
     echo "Bank Transaction: " . $validation->bankTranId;
 }
 ```
@@ -299,16 +252,15 @@ if ($validation->isSuccessful()) {
 ### Refund
 
 ```php
-use Sslcommerz\Laravel\DTOs\RefundRequestDTO;
-
-$refund = SSLCOMMERZ::refund(RefundRequestDTO::fromArray([
+// Simply pass an array
+$refund = SSLCOMMERZ::refund([
     'bank_tran_id'   => $bankTranId,
     'refund_amount'  => 500.00,
     'refund_remarks' => 'Customer requested refund',
-]));
+]);
 
 if ($refund->isSuccessful()) {
-    echo "Refund Reference: " . $refund->refundRefId;
+    echo "Refund Reference: " . $refund['refund_ref_id'];
 }
 ```
 
@@ -351,9 +303,9 @@ After SSLCOMMERZ processes the payment and sends a callback to your server, the 
 
 ```php
 'redirect' => [
-    'success' => env('SSLCOMMERZ_REDIRECT_SUCCESS', '/payment/success'),
-    'fail'    => env('SSLCOMMERZ_REDIRECT_FAIL', '/payment/fail'),
-    'cancel'  => env('SSLCOMMERZ_REDIRECT_CANCEL', '/payment/cancel'),
+    'success' => env('SSLCOMMERZ_SUCCESS', '/payment/success'),
+    'fail'    => env('SSLCOMMERZ_FAIL', '/payment/fail'),
+    'cancel'  => env('SSLCOMMERZ_CANCEL', '/payment/cancel'),
 ],
 ```
 
@@ -409,9 +361,9 @@ Route::get('/order/failed', function () {
 **2. Update your `.env`:**
 
 ```env
-SSLCOMMERZ_REDIRECT_SUCCESS=/order/thank-you
-SSLCOMMERZ_REDIRECT_FAIL=/order/failed
-SSLCOMMERZ_REDIRECT_CANCEL=/order/failed
+SSLCOMMERZ_SUCCESS=/order/thank-you
+SSLCOMMERZ_FAIL=/order/failed
+SSLCOMMERZ_CANCEL=/order/failed
 ```
 
 > **Note:** When using custom redirect URLs that don't match the default `/payment/*` paths, the package's default routes will still be registered but won't be used. This is harmless.
@@ -538,15 +490,15 @@ SSLCOMMERZ::shouldReceive('initiate')
 
 ## API Reference
 
-### `SSLCOMMERZ::initiate(PaymentRequestDTO $request): PaymentResponseDTO`
+### `SSLCOMMERZ::initiate(PaymentRequestDTO|array $request): PaymentResponseDTO`
 
-Creates a payment session and returns the gateway redirect URL.
+Creates a payment session. If an array is passed, it is automatically converted to a DTO with sensible defaults.
 
 ### `SSLCOMMERZ::validate(string $valId): ValidationResponseDTO`
 
 Validates a transaction using the validation ID from callback/IPN.
 
-### `SSLCOMMERZ::refund(RefundRequestDTO $request): RefundResponseDTO`
+### `SSLCOMMERZ::refund(RefundRequestDTO|array $request): RefundResponseDTO`
 
 Initiates a refund for a previously successful transaction.
 

@@ -146,7 +146,8 @@ final readonly class PaymentRequestDTO
      */
     public static function fromArray(array $data): self
     {
-        $required = ['tran_id', 'total_amount', 'cus_name', 'cus_email', 'cus_phone', 'cus_add1', 'cus_city', 'cus_postcode', 'cus_country', 'product_name'];
+        // Define minimum required fields for a basic transaction
+        $required = ['total_amount', 'cus_name'];
 
         foreach ($required as $field) {
             if (empty($data[$field])) {
@@ -155,7 +156,7 @@ final readonly class PaymentRequestDTO
         }
 
         return new self(
-            tranId:           $data['tran_id'],
+            tranId:           $data['tran_id'] ?? uniqid('SSL'),
             totalAmount:      (float) $data['total_amount'],
             currency:         $data['currency'] ?? config('sslcommerz.currency', 'BDT'),
             cusName:          $data['cus_name'],
@@ -164,8 +165,8 @@ final readonly class PaymentRequestDTO
             cusAdd1:          $data['cus_add1'],
             cusCity:          $data['cus_city'],
             cusPostcode:      $data['cus_postcode'],
-            cusCountry:       $data['cus_country'],
-            productName:      $data['product_name'],
+            cusCountry:       $data['cus_country'] ?? 'Bangladesh',
+            productName:      $data['product_name'] ?? 'Payment',
             productCategory:  $data['product_category'] ?? config('sslcommerz.product.category', 'general'),
             productProfile:   $data['product_profile'] ?? config('sslcommerz.product.profile', 'general'),
             cusAdd2:          $data['cus_add2'] ?? null,

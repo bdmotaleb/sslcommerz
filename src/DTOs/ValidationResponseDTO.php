@@ -2,13 +2,20 @@
 
 namespace Sslcommerz\Laravel\DTOs;
 
+use ArrayAccess;
+use JsonSerializable;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Jsonable;
+
 /**
  * Validation Response DTO
  *
  * Wraps the response from the SSLCOMMERZ Order Validation API.
  */
-final readonly class ValidationResponseDTO
+final readonly class ValidationResponseDTO implements ArrayAccess, JsonSerializable, Arrayable, Jsonable
 {
+    use ArrayableDTO;
+
     public function __construct(
         public string  $status,
         public ?string $tranDate,

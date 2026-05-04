@@ -52,7 +52,7 @@ class SslcommerzServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_throws_exception_on_initiation_failure(): void
+    public function it_returns_failed_dto_on_initiation_failure(): void
     {
         Http::fake([
             'sandbox.sslcommerz.com/*' => Http::response([
@@ -61,22 +61,24 @@ class SslcommerzServiceTest extends TestCase
             ], 200),
         ]);
 
-        $this->expectException(PaymentInitiationException::class);
-        $this->expectExceptionMessage('Invalid Store ID');
+        $response = $this->service->initiate($this->makePaymentRequest());
 
-        $this->service->initiate($this->makePaymentRequest());
+        $this->assertFalse($response->isSuccessful());
+        $this->assertEquals('FAILED', $response->status);
+        $this->assertEquals('Invalid Store ID', $response->failedReason);
     }
 
     /** @test */
-    public function it_throws_exception_on_connection_failure(): void
+    public function it_returns_failed_dto_on_connection_failure(): void
     {
         Http::fake([
             'sandbox.sslcommerz.com/*' => Http::response('Server Error', 500),
         ]);
 
-        $this->expectException(PaymentInitiationException::class);
+        $response = $this->service->initiate($this->makePaymentRequest());
 
-        $this->service->initiate($this->makePaymentRequest());
+        $this->assertFalse($response->isSuccessful());
+        $this->assertStringContainsString('HTTP 500', $response->failedReason);
     }
 
     /** @test */

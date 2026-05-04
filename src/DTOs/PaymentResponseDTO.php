@@ -2,14 +2,21 @@
 
 namespace Sslcommerz\Laravel\DTOs;
 
+use ArrayAccess;
+use JsonSerializable;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Jsonable;
+
 /**
  * Payment Response DTO
  *
  * Wraps the SSLCOMMERZ session initiation API response,
  * providing typed access to the gateway redirect URL and metadata.
  */
-final readonly class PaymentResponseDTO
+final readonly class PaymentResponseDTO implements ArrayAccess, JsonSerializable, Arrayable, Jsonable
 {
+    use ArrayableDTO;
+
     public function __construct(
         public string  $status,
         public ?string $sessionKey,
@@ -48,10 +55,42 @@ final readonly class PaymentResponseDTO
     }
 
     /**
+     * Create a failed response DTO with an error message.
+     */
+    public static function failed(string $reason): self
+    {
+        return new self(
+            status: 'FAILED',
+            sessionKey: null,
+            gatewayPageUrl: null,
+            redirectGatewayUrl: null,
+            directPaymentUrl: null,
+            storeBanner: null,
+            storeLogo: null,
+            failedReason: $reason
+        );
+    }
+
+    /**
      * Check if the payment session was created successfully.
      */
     public function isSuccessful(): bool
     {
         return $this->status === 'SUCCESS' && ! empty($this->gatewayPageUrl);
+    }
+
+    /**
+     * Get a redirect response to the gateway page.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception If the response was not successful
+     */
+    public function redirect()
+    {
+        if (! $this->isSuccessful()) {
+            throw new \Exception("Cannot redirect: payment initiation failed. Reason: " . ($this->failedReason ?? 'Unknown'));
+        }
+
+        return redirect()->away($this->gatewayPageUrl);
     }
 }
