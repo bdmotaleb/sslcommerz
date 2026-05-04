@@ -140,45 +140,6 @@ class SslcommerzCallbackController extends Controller
     }
 
     /**
-     * Default redirect handler for successful payments.
-     */
-    public function handleRedirectSuccess(Request $request)
-    {
-        return response()->json([
-            'success' => true,
-            'message' => session('sslcommerz_message', 'Payment completed successfully.'),
-            'tran_id' => session('sslcommerz_tran_id'),
-            'status'  => session('sslcommerz_status'),
-        ]);
-    }
-
-    /**
-     * Default redirect handler for failed payments.
-     */
-    public function handleRedirectFail(Request $request)
-    {
-        return response()->json([
-            'success' => false,
-            'message' => session('sslcommerz_message', 'Payment failed.'),
-            'tran_id' => session('sslcommerz_tran_id'),
-            'status'  => session('sslcommerz_status'),
-        ]);
-    }
-
-    /**
-     * Default redirect handler for cancelled payments.
-     */
-    public function handleRedirectCancel(Request $request)
-    {
-        return response()->json([
-            'success' => false,
-            'message' => session('sslcommerz_message', 'Payment was cancelled.'),
-            'tran_id' => session('sslcommerz_tran_id'),
-            'status'  => session('sslcommerz_status'),
-        ]);
-    }
-
-    /**
      * Log callback data if logging is enabled.
      */
     private function logCallback(string $type, CallbackDTO $callback): void

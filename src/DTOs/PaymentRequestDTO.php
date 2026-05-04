@@ -77,14 +77,14 @@ final readonly class PaymentRequestDTO
         public string  $tranId,
         public float   $totalAmount,
         public string  $currency,
-        public string  $cusName,
-        public string  $cusEmail,
-        public string  $cusPhone,
-        public string  $cusAdd1,
-        public string  $cusCity,
-        public string  $cusPostcode,
-        public string  $cusCountry,
-        public string  $productName,
+        public ?string $cusName = null,
+        public ?string $cusEmail = null,
+        public ?string $cusPhone = null,
+        public ?string $cusAdd1 = null,
+        public ?string $cusCity = null,
+        public ?string $cusPostcode = null,
+        public ?string $cusCountry = 'Bangladesh',
+        public ?string $productName = 'Payment',
         public string  $productCategory = 'general',
         public string  $productProfile = 'general',
         public ?string $cusAdd2 = null,
@@ -159,12 +159,12 @@ final readonly class PaymentRequestDTO
             tranId:           $data['tran_id'] ?? uniqid('SSL'),
             totalAmount:      (float) $data['total_amount'],
             currency:         $data['currency'] ?? config('sslcommerz.currency', 'BDT'),
-            cusName:          $data['cus_name'],
-            cusEmail:         $data['cus_email'],
-            cusPhone:         $data['cus_phone'],
-            cusAdd1:          $data['cus_add1'],
-            cusCity:          $data['cus_city'],
-            cusPostcode:      $data['cus_postcode'],
+            cusName:          $data['cus_name'] ?? null,
+            cusEmail:         $data['cus_email'] ?? null,
+            cusPhone:         $data['cus_phone'] ?? null,
+            cusAdd1:          $data['cus_add1'] ?? null,
+            cusCity:          $data['cus_city'] ?? null,
+            cusPostcode:      $data['cus_postcode'] ?? null,
             cusCountry:       $data['cus_country'] ?? 'Bangladesh',
             productName:      $data['product_name'] ?? 'Payment',
             productCategory:  $data['product_category'] ?? config('sslcommerz.product.category', 'general'),
@@ -229,14 +229,6 @@ final readonly class PaymentRequestDTO
             'tran_id'          => $this->tranId,
             'total_amount'     => $this->totalAmount,
             'currency'         => $this->currency,
-            'cus_name'         => $this->cusName,
-            'cus_email'        => $this->cusEmail,
-            'cus_phone'        => $this->cusPhone,
-            'cus_add1'         => $this->cusAdd1,
-            'cus_city'         => $this->cusCity,
-            'cus_postcode'     => $this->cusPostcode,
-            'cus_country'      => $this->cusCountry,
-            'product_name'     => $this->productName,
             'product_category' => $this->productCategory,
             'product_profile'  => $this->productProfile,
             'shipping_method'  => $this->shippingMethod,
@@ -244,6 +236,24 @@ final readonly class PaymentRequestDTO
             'emi_option'       => $this->emiOption,
             'emi_allow_only'   => $this->emiAllowOnly,
         ];
+
+        // Include non-null mandatory-like fields
+        $mandatoryLike = [
+            'cusName'     => 'cus_name',
+            'cusEmail'    => 'cus_email',
+            'cusPhone'    => 'cus_phone',
+            'cusAdd1'     => 'cus_add1',
+            'cusCity'     => 'cus_city',
+            'cusPostcode' => 'cus_postcode',
+            'cusCountry'  => 'cus_country',
+            'productName' => 'product_name',
+        ];
+
+        foreach ($mandatoryLike as $property => $apiKey) {
+            if ($this->{$property} !== null) {
+                $payload[$apiKey] = $this->{$property};
+            }
+        }
 
         // Optional fields — only include if set
         $optionalMappings = [

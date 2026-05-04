@@ -290,12 +290,7 @@ The package registers these routes automatically:
 
 All routes exclude CSRF verification since SSLCOMMERZ sends POST requests.
 
-The default controller:
-1. Parses callback data into a `CallbackDTO`
-2. Verifies hash integrity (IPN)
-3. Validates via SSLCOMMERZ API
-4. Dispatches events
-5. Redirects to configured URLs
+The package ships with the logic to process callbacks, dispatch events, and flash data to the session. However, you must define the final result pages (GET routes) in your application.
 
 ### Redirect URLs (After Payment)
 
@@ -309,64 +304,37 @@ After SSLCOMMERZ processes the payment and sends a callback to your server, the 
 ],
 ```
 
-The package ships with **default GET routes** that handle these paths out of the box:
-
-| Route                  | Name                          | Response |
-|------------------------|-------------------------------|----------|
-| GET `/payment/success` | `sslcommerz.redirect.success` | JSON with transaction details |
-| GET `/payment/fail`    | `sslcommerz.redirect.fail`    | JSON with failure info |
-| GET `/payment/cancel`  | `sslcommerz.redirect.cancel`  | JSON with cancellation info |
-
-**Default JSON response example** (`/payment/success`):
-
-```json
-{
-    "success": true,
-    "message": "Payment completed successfully.",
-    "tran_id": "ORDER_6651a3f2e4b01",
-    "status": "VALID"
-}
-```
-
-The transaction data is flashed to the session. You can access it via:
+The transaction data is flashed to the session before redirecting. You can access it in your custom pages via:
 
 ```php
 session('sslcommerz_tran_id')  // Transaction ID
 session('sslcommerz_status')   // Payment status (VALID, FAILED, CANCELLED)
-session('sslcommerz_message')  // Optional message
+session('sslcommerz_message')  // Status message
 ```
 
 #### Custom Redirect Pages
 
-To use your own result pages instead of the default JSON responses, define your own routes and update `.env`:
-
-**1. Define your routes:**
+Define your own routes and views to show the payment result to the user:
 
 ```php
 // routes/web.php
-Route::get('/order/thank-you', function () {
-    return view('order.thank-you', [
+Route::get('/payment/success', function () {
+    return view('payment.success', [
         'tran_id' => session('sslcommerz_tran_id'),
         'status'  => session('sslcommerz_status'),
     ]);
 });
-
-Route::get('/order/failed', function () {
-    return view('order.failed', [
-        'tran_id' => session('sslcommerz_tran_id'),
-    ]);
-});
 ```
 
-**2. Update your `.env`:**
+Update your `.env` to point to these routes:
 
 ```env
-SSLCOMMERZ_SUCCESS=/order/thank-you
-SSLCOMMERZ_FAIL=/order/failed
-SSLCOMMERZ_CANCEL=/order/failed
+SSLCOMMERZ_SUCCESS=/payment/success
+SSLCOMMERZ_FAIL=/payment/failed
+SSLCOMMERZ_CANCEL=/payment/cancelled
 ```
 
-> **Note:** When using custom redirect URLs that don't match the default `/payment/*` paths, the package's default routes will still be registered but won't be used. This is harmless.
+---
 
 ---
 
