@@ -62,10 +62,16 @@ class SslcommerzServiceProvider extends ServiceProvider
             __DIR__ . '/../routes/sslcommerz.php' => base_path('routes/sslcommerz.php'),
         ], 'sslcommerz-routes');
 
+        // Publish controller
+        $this->publishes([
+            __DIR__ . '/../stubs/SslcommerzCallbackController.stub' => app_path('Http/Controllers/SslcommerzCallbackController.php'),
+        ], 'sslcommerz-controller');
+
         // Publish everything
         $this->publishes([
             __DIR__ . '/../config/sslcommerz.php'  => config_path('sslcommerz.php'),
             __DIR__ . '/../routes/sslcommerz.php'   => base_path('routes/sslcommerz.php'),
+            __DIR__ . '/../stubs/SslcommerzCallbackController.stub' => app_path('Http/Controllers/SslcommerzCallbackController.php'),
         ], 'sslcommerz');
     }
 
