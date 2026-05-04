@@ -58,7 +58,8 @@ class SslcommerzCallbackController extends Controller
 
         return redirect(config('sslcommerz.redirect.success'))
             ->with('sslcommerz_tran_id', $callback->tranId)
-            ->with('sslcommerz_status', $validation?->status ?? $callback->status);
+            ->with('sslcommerz_status', $validation?->status ?? $callback->status)
+            ->with('sslcommerz_message', 'Payment completed successfully.');
     }
 
     /**
@@ -75,7 +76,8 @@ class SslcommerzCallbackController extends Controller
 
         return redirect(config('sslcommerz.redirect.fail'))
             ->with('sslcommerz_tran_id', $callback->tranId)
-            ->with('sslcommerz_status', 'FAILED');
+            ->with('sslcommerz_status', 'FAILED')
+            ->with('sslcommerz_message', $callback->error ?? 'Payment failed.');
     }
 
     /**
@@ -92,7 +94,8 @@ class SslcommerzCallbackController extends Controller
 
         return redirect(config('sslcommerz.redirect.cancel'))
             ->with('sslcommerz_tran_id', $callback->tranId)
-            ->with('sslcommerz_status', 'CANCELLED');
+            ->with('sslcommerz_status', 'CANCELLED')
+            ->with('sslcommerz_message', 'Payment was cancelled by the user.');
     }
 
     /**
@@ -134,6 +137,45 @@ class SslcommerzCallbackController extends Controller
         event(new IpnReceived($callback, $validation));
 
         return response('IPN RECEIVED', 200);
+    }
+
+    /**
+     * Default redirect handler for successful payments.
+     */
+    public function handleRedirectSuccess(Request $request)
+    {
+        return response()->json([
+            'success' => true,
+            'message' => session('sslcommerz_message', 'Payment completed successfully.'),
+            'tran_id' => session('sslcommerz_tran_id'),
+            'status'  => session('sslcommerz_status'),
+        ]);
+    }
+
+    /**
+     * Default redirect handler for failed payments.
+     */
+    public function handleRedirectFail(Request $request)
+    {
+        return response()->json([
+            'success' => false,
+            'message' => session('sslcommerz_message', 'Payment failed.'),
+            'tran_id' => session('sslcommerz_tran_id'),
+            'status'  => session('sslcommerz_status'),
+        ]);
+    }
+
+    /**
+     * Default redirect handler for cancelled payments.
+     */
+    public function handleRedirectCancel(Request $request)
+    {
+        return response()->json([
+            'success' => false,
+            'message' => session('sslcommerz_message', 'Payment was cancelled.'),
+            'tran_id' => session('sslcommerz_tran_id'),
+            'status'  => session('sslcommerz_status'),
+        ]);
     }
 
     /**
