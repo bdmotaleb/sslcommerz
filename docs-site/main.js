@@ -55,8 +55,9 @@ function copyToClipboard(text) {
     });
 }
 
-// Navbar Scroll Effect
+// Navbar Scroll Effect & Scroll Spy
 window.addEventListener('scroll', () => {
+    // Navbar effect
     const nav = document.getElementById('navbar');
     if (window.scrollY > 50) {
         nav.style.background = 'rgba(10, 10, 12, 0.9)';
@@ -65,4 +66,42 @@ window.addEventListener('scroll', () => {
         nav.style.background = 'rgba(10, 10, 12, 0.1)';
         nav.style.padding = '20px 0';
     }
+
+    // Scroll Spy for Documentation Sidebar
+    const docSections = document.querySelectorAll('.doc-card');
+    const docLinks = document.querySelectorAll('.docs-sidebar a');
+    let current = '';
+
+    docSections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        // If the top of the section is near the top of the viewport
+        if (rect.top <= 150) {
+            current = section.getAttribute('id');
+        }
+    });
+
+    if (current) {
+        docLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${current}`) {
+                link.classList.add('active');
+            }
+        });
+    }
+});
+
+// Smooth Scroll for Sidebar Links
+document.querySelectorAll('.docs-sidebar a').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href');
+        const targetSection = document.querySelector(targetId);
+        if (targetSection) {
+            const targetTop = targetSection.getBoundingClientRect().top + window.pageYOffset;
+            window.scrollTo({
+                top: targetTop - 120,
+                behavior: 'smooth'
+            });
+        }
+    });
 });

@@ -462,6 +462,115 @@ footer {
     font-size: 0.9rem;
 }
 
+/* Documentation Section Styles */
+.docs-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 60px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    backdrop-filter: blur(20px);
+}
+
+.docs-sidebar {
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+}
+
+.sidebar-group {
+    margin-bottom: 30px;
+}
+
+.sidebar-group h4 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 15px;
+}
+
+.sidebar-group ul li {
+    margin-bottom: 8px;
+}
+
+.sidebar-group a {
+    color: var(--text-main);
+    font-size: 0.95rem;
+    display: block;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition-base);
+}
+
+.sidebar-group a:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--primary);
+}
+
+.sidebar-group a.active {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.docs-content h2 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.docs-content .text-muted {
+    margin-bottom: 40px;
+}
+
+.doc-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.doc-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.doc-card h3 i {
+    color: var(--primary);
+}
+
+.doc-card p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+}
+
+.doc-card pre {
+    background: #000;
+    padding: 15px;
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    font-size: 0.85rem;
+    border: 1px solid var(--border);
+}
+
+/* Responsive Docs */
+@media (max-width: 1024px) {
+    .docs-layout {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+    .docs-sidebar {
+        display: none; /* Hide on mobile for simplicity, or implement drawer */
+    }
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .hero h1 { font-size: 3.5rem; }
