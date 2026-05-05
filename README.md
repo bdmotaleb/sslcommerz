@@ -119,6 +119,31 @@ Register at [https://developer.sslcommerz.com/registration/](https://developer.s
 
 ---
 
+## Custom Controllers
+
+You can easily override the default callback behavior.
+
+1. **Publish the Controller Stub:**
+   ```bash
+   php artisan vendor:publish --tag=sslcommerz-controller
+   ```
+
+2. **Update Configuration:**
+   In your `config/sslcommerz.php`, update the `controller` option to point to your new controller:
+   ```php
+   'routes' => [
+       'controller' => \App\Http\Controllers\SslcommerzCallbackController::class,
+       // ...
+   ],
+   ```
+
+3. **Customize Logic:**
+   Edit `app/Http/Controllers/SslcommerzCallbackController.php` to suit your needs.
+
+> **Note:** If you want to customize the URLs or middleware, you can also publish the routes:
+> `php artisan vendor:publish --tag=sslcommerz-routes`
+
+
 ---
 
 ## Payment Flow
@@ -379,31 +404,6 @@ Route::middleware('sslcommerz.verify')
 
 ---
 
-## Custom Controllers
-
-You can easily override the default callback behavior.
-
-1. **Publish the Controller Stub:**
-   ```bash
-   php artisan vendor:publish --tag=sslcommerz-controller
-   ```
-
-2. **Update Configuration:**
-   In your `config/sslcommerz.php`, update the `controller` option to point to your new controller:
-   ```php
-   'routes' => [
-       'controller' => \App\Http\Controllers\SslcommerzCallbackController::class,
-       // ...
-   ],
-   ```
-
-3. **Customize Logic:**
-   Edit `app/Http/Controllers/SslcommerzCallbackController.php` to suit your needs.
-
-> **Note:** If you want to customize the URLs or middleware, you can also publish the routes:
-> `php artisan vendor:publish --tag=sslcommerz-routes`
-
----
 
 ## Testing
 
