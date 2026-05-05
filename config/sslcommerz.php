@@ -81,20 +81,6 @@ return [
         'ipn'     => '/ssl/ipn',
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Redirect URLs After Payment
-    |--------------------------------------------------------------------------
-    |
-    | Where to redirect the user after the callback controller processes
-    | the payment result. Set these to your application's pages.
-    |
-    */
-    'redirect' => [
-        'success' => env('SSLCOMMERZ_SUCCESS', '/payment/success'),
-        'fail'    => env('SSLCOMMERZ_FAIL', '/payment/fail'),
-        'cancel'  => env('SSLCOMMERZ_CANCEL', '/payment/cancel'),
-    ],
 
     /*
     |--------------------------------------------------------------------------

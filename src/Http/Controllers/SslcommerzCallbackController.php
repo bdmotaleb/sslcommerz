@@ -14,7 +14,6 @@ use Sslcommerz\Laravel\Events\PaymentSucceeded;
 
 /**
  * Default SSLCOMMERZ Callback Controller
- *
  * Handles payment callbacks from the SSLCOMMERZ gateway.
  * Users can override this by binding their own CallbackHandlerInterface
  * implementation or by publishing and modifying the routes.
@@ -23,7 +22,8 @@ class SslcommerzCallbackController extends Controller
 {
     public function __construct(
         private readonly PaymentGatewayInterface $gateway,
-    ) {
+    )
+    {
     }
 
     /**
@@ -56,10 +56,7 @@ class SslcommerzCallbackController extends Controller
             event(new PaymentSucceeded($callback, $validation));
         }
 
-        return redirect(config('sslcommerz.redirect.success'))
-            ->with('sslcommerz_tran_id', $callback->tranId)
-            ->with('sslcommerz_status', $validation?->status ?? $callback->status)
-            ->with('sslcommerz_message', 'Payment completed successfully.');
+        return redirect('/payment/success');
     }
 
     /**
@@ -74,10 +71,7 @@ class SslcommerzCallbackController extends Controller
 
         event(new PaymentFailed($callback));
 
-        return redirect(config('sslcommerz.redirect.fail'))
-            ->with('sslcommerz_tran_id', $callback->tranId)
-            ->with('sslcommerz_status', 'FAILED')
-            ->with('sslcommerz_message', $callback->error ?? 'Payment failed.');
+        return redirect('/payment/fail');
     }
 
     /**
@@ -92,10 +86,7 @@ class SslcommerzCallbackController extends Controller
 
         event(new PaymentCancelled($callback));
 
-        return redirect(config('sslcommerz.redirect.cancel'))
-            ->with('sslcommerz_tran_id', $callback->tranId)
-            ->with('sslcommerz_status', 'CANCELLED')
-            ->with('sslcommerz_message', 'Payment was cancelled by the user.');
+        return redirect('/payment/cancel');
     }
 
     /**
@@ -108,7 +99,7 @@ class SslcommerzCallbackController extends Controller
         $this->logCallback('ipn', $callback);
 
         // Verify hash integrity
-        if (! $this->gateway->verifyHash($request->all())) {
+        if (!$this->gateway->verifyHash($request->all())) {
             Log::channel(config('sslcommerz.logging.channel', 'stack'))
                 ->warning('SSLCOMMERZ IPN hash verification failed', [
                     'tran_id' => $callback->tranId,
@@ -144,7 +135,7 @@ class SslcommerzCallbackController extends Controller
      */
     private function logCallback(string $type, CallbackDTO $callback): void
     {
-        if (! config('sslcommerz.logging.enabled', true)) {
+        if (!config('sslcommerz.logging.enabled', true)) {
             return;
         }
 

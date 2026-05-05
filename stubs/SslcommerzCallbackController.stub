@@ -55,10 +55,7 @@ class SslcommerzCallbackController extends Controller
             event(new PaymentSucceeded($callback, $validation));
         }
  
-        return redirect(config('sslcommerz.redirect.success'))
-            ->with('sslcommerz_tran_id', $callback->tranId)
-            ->with('sslcommerz_status', $validation?->status ?? $callback->status)
-            ->with('sslcommerz_message', 'Payment completed successfully.');
+        return redirect('/payment/success');
     }
  
     /**
@@ -73,10 +70,7 @@ class SslcommerzCallbackController extends Controller
  
         event(new PaymentFailed($callback));
  
-        return redirect(config('sslcommerz.redirect.fail'))
-            ->with('sslcommerz_tran_id', $callback->tranId)
-            ->with('sslcommerz_status', 'FAILED')
-            ->with('sslcommerz_message', $callback->error ?? 'Payment failed.');
+        return redirect('/payment/fail');
     }
  
     /**
@@ -91,10 +85,7 @@ class SslcommerzCallbackController extends Controller
  
         event(new PaymentCancelled($callback));
  
-        return redirect(config('sslcommerz.redirect.cancel'))
-            ->with('sslcommerz_tran_id', $callback->tranId)
-            ->with('sslcommerz_status', 'CANCELLED')
-            ->with('sslcommerz_message', 'Payment was cancelled by the user.');
+        return redirect('/payment/cancel');
     }
  
     /**

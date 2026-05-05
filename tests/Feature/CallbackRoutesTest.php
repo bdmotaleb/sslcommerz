@@ -44,7 +44,7 @@ class CallbackRoutesTest extends TestCase
             'card_type'    => 'VISA',
         ]);
 
-        $response->assertRedirect(config('sslcommerz.redirect.success'));
+        $response->assertRedirect('/payment/success');
 
 
         Event::assertDispatched(PaymentSucceeded::class);
@@ -59,7 +59,7 @@ class CallbackRoutesTest extends TestCase
             'tran_id' => 'TXN_FAIL_001',
         ]);
 
-        $response->assertRedirect(config('sslcommerz.redirect.fail'));
+        $response->assertRedirect('/payment/fail');
 
 
         Event::assertDispatched(PaymentFailed::class);
@@ -74,7 +74,7 @@ class CallbackRoutesTest extends TestCase
             'tran_id' => 'TXN_CANCEL_001',
         ]);
 
-        $response->assertRedirect(config('sslcommerz.redirect.cancel'));
+        $response->assertRedirect('/payment/cancel');
 
 
         Event::assertDispatched(PaymentCancelled::class);

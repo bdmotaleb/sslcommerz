@@ -71,11 +71,6 @@ SSLCOMMERZ_STORE_ID=your_store_id
 SSLCOMMERZ_STORE_PASSWORD=your_store_password
 SSLCOMMERZ_CURRENCY=BDT
 SSLCOMMERZ_LOG_ENABLED=true
-
-# Redirect URLs after payment processing
-SSLCOMMERZ_SUCCESS=/payment/success
-SSLCOMMERZ_FAIL=/payment/fail
-SSLCOMMERZ_CANCEL=/payment/cancel
 ```
 
 > **⚠️ Important:** `APP_URL` must be set to your publicly accessible domain (e.g. `https://yourdomain.com`). SSLCOMMERZ uses this to send POST callbacks (success, fail, cancel, IPN) to your server. If `APP_URL` is `http://localhost`, callbacks from SSLCOMMERZ will fail in production.
@@ -290,27 +285,9 @@ The package registers these routes automatically:
 
 All routes exclude CSRF verification since SSLCOMMERZ sends POST requests.
 
-The package ships with the logic to process callbacks, dispatch events, and flash data to the session. However, you must define the final result pages (GET routes) in your application.
+The package ships with the logic to process callbacks and dispatch events. However, you must define the final result pages (GET routes) in your application.
 
-### Redirect URLs (After Payment)
-
-After SSLCOMMERZ processes the payment and sends a callback to your server, the package **redirects the user** to a result page. These redirect URLs are configured in `config/sslcommerz.php`:
-
-```php
-'redirect' => [
-    'success' => env('SSLCOMMERZ_SUCCESS', '/payment/success'),
-    'fail'    => env('SSLCOMMERZ_FAIL', '/payment/fail'),
-    'cancel'  => env('SSLCOMMERZ_CANCEL', '/payment/cancel'),
-],
-```
-
-The transaction data is flashed to the session before redirecting. You can access it in your custom pages via:
-
-```php
-session('sslcommerz_tran_id')  // Transaction ID
-session('sslcommerz_status')   // Payment status (VALID, FAILED, CANCELLED)
-session('sslcommerz_message')  // Status message
-```
+The transaction data is available via events. You can define your own routes and views to show the payment result to the user.
 
 #### Custom Redirect Pages
 
@@ -319,22 +296,9 @@ Define your own routes and views to show the payment result to the user:
 ```php
 // routes/web.php
 Route::get('/payment/success', function () {
-    return view('payment.success', [
-        'tran_id' => session('sslcommerz_tran_id'),
-        'status'  => session('sslcommerz_status'),
-    ]);
+    return view('payment.success');
 });
 ```
-
-Update your `.env` to point to these routes:
-
-```env
-SSLCOMMERZ_SUCCESS=/payment/success
-SSLCOMMERZ_FAIL=/payment/failed
-SSLCOMMERZ_CANCEL=/payment/cancelled
-```
-
----
 
 ---
 
@@ -415,17 +379,20 @@ Route::middleware('sslcommerz.verify')
 
 ## Custom Controllers
 
-Override the default callback behavior by publishing routes and pointing to your own controllers:
+Override the default callback behavior by publishing the controller and routes. This allows you to customize the logic and define your own redirect URLs:
 
 ```bash
-php artisan vendor:publish --tag=sslcommerz-routes
+php artisan vendor:publish --tag=sslcommerz
 ```
 
-Then edit `routes/sslcommerz.php`:
+Then edit `app/Http/Controllers/SslcommerzCallbackController.php`:
 
 ```php
-Route::post('/success', [YourPaymentController::class, 'success'])
-    ->name('sslcommerz.success');
+public function success(Request $request)
+{
+    // ... logic ...
+    return redirect('/your-custom-success-page');
+}
 ```
 
 ---
