@@ -1,13 +1,5 @@
 # SSLCOMMERZ Laravel Payment Gateway
 
-A production-ready Laravel package for integrating the **SSLCOMMERZ** payment gateway (API v4). Built with clean architecture, fully typed DTOs, event-driven callbacks, and extensible contracts.
-
-[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-8892BF.svg)](https://php.net/)
-[![Laravel](https://img.shields.io/badge/laravel-10.x%20%7C%2011.x%20%7C%2012.x%20%7C%2013.x-FF2D20.svg)](https://laravel.com)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-
----
-
 ## Table of Contents
 
 - [Installation](#installation)
@@ -16,11 +8,12 @@ A production-ready Laravel package for integrating the **SSLCOMMERZ** payment ga
 - [Payment Flow](#payment-flow)
 - [Usage](#usage)
   - [Initiate Payment](#initiate-payment)
+  - [Recurring Payments (Easycheckout)](#recurring-payments-easycheckout)
   - [Validate Transaction](#validate-transaction)
   - [Refund](#refund)
   - [Query Transaction](#query-transaction)
 - [Callback Handling](#callback-handling)
-  - [Redirect URLs](#redirect-urls-after-payment)
+  - [Redirect URLs After Payment](#redirect-urls-after-payment)
 - [Events](#events)
 - [Hash Verification](#hash-verification)
 - [Custom Controllers](#custom-controllers)
@@ -68,6 +61,8 @@ SSLCOMMERZ_STORE_ID=your_store_id
 SSLCOMMERZ_STORE_PASSWORD=your_store_password
 SSLCOMMERZ_CURRENCY=BDT
 SSLCOMMERZ_LOG_ENABLED=true
+SSLCOMMERZ_LOG_CHANNEL=stack
+SSLCOMMERZ_SALT_KEY=your_salt_key
 ```
 
 ```env
@@ -75,7 +70,7 @@ SSLCOMMERZ_LOG_ENABLED=true
 APP_URL=https://yourdomain.com
 ```
 
-> **⚠️ Important:** `APP_URL` must be set to your publicly accessible domain (e.g. `https://yourdomain.com`). SSLCOMMERZ uses this to send POST callbacks (success, fail, cancel, IPN) to your server. If `APP_URL` is `http://localhost`, callbacks from SSLCOMMERZ will fail in production.
+> **Note:** `SSLCOMMERZ_SALT_KEY` is required for recurring payments (Easycheckout). `SSLCOMMERZ_LOG_CHANNEL` lets you pick a Laravel log channel.
 
 ## Quick Start
 
@@ -140,11 +135,8 @@ You can easily override the default callback behavior.
 3. **Customize Logic:**
    Edit `app/Http/Controllers/SslcommerzCallbackController.php` to suit your needs.
 
-> **Note:** If you want to customize the URLs or middleware, you can also publish the routes:
+> **Note:** If you want to customize the URLs, you can also publish the routes:
 > `php artisan vendor:publish --tag=sslcommerz-routes`
-
-
----
 
 ## Payment Flow
 
@@ -213,7 +205,7 @@ if ($response['status'] === 'SUCCESS') {
 
 ### Recurring Payments (Easycheckout)
 
-SSLCOMMERZ support recurring payments via a `schedule` parameter.
+SSLCOMMERZ supports recurring payments via a `schedule` parameter.
 
 **1. Configure SALT Key:**
 Add `SSLCOMMERZ_SALT_KEY` to your `.env` file. This key is provided by the SSLCOMMERZ team.
@@ -254,6 +246,9 @@ $status = SSLCOMMERZ::getSubscriptionStatus($refer, $subscriptionId);
 
 // Disable temporarily
 SSLCOMMERZ::disableSubscription($refer, $subscriptionId);
+
+// Re-enable
+SSLCOMMERZ::enableSubscription($refer, $subscriptionId);
 
 // Cancel permanently
 SSLCOMMERZ::cancelSubscription($refer, $subscriptionId);
@@ -312,11 +307,9 @@ The package registers these routes automatically:
 
 All routes exclude CSRF verification since SSLCOMMERZ sends POST requests.
 
-The package ships with the logic to process callbacks and dispatch events. However, you must define the final result pages (GET routes) in your application.
+By default, the prefix is `ssl`. You can change it via `sslcommerz.routes.prefix` in `config/sslcommerz.php`, or publish routes to customize paths.
 
-The transaction data is available via events. You can define your own routes and views to show the payment result to the user.
-
-#### Custom Redirect Pages
+#### Redirect URLs After Payment
 
 Define your own routes and views to show the payment result to the user:
 
@@ -417,7 +410,7 @@ composer install
 ### Mock in Your Application Tests
 
 ```php
-use Sslcommerz\Laravel\Facades\Sslcommerz;
+use Sslcommerz\Laravel\Facades\SSLCOMMERZ;
 use Sslcommerz\Laravel\DTOs\PaymentResponseDTO;
 
 SSLCOMMERZ::shouldReceive('initiate')
