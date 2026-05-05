@@ -74,11 +74,12 @@ return [
     |
     */
     'routes' => [
-        'prefix'  => 'ssl',
-        'success' => '/ssl/success',
-        'fail'    => '/ssl/fail',
-        'cancel'  => '/ssl/cancel',
-        'ipn'     => '/ssl/ipn',
+        'prefix'     => 'ssl',
+        'controller' => \Sslcommerz\Laravel\Http\Controllers\SslcommerzCallbackController::class,
+        'success'    => '/ssl/success',
+        'fail'       => '/ssl/fail',
+        'cancel'     => '/ssl/cancel',
+        'ipn'        => '/ssl/ipn',
     ],
 
 

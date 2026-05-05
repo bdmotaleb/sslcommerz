@@ -56,7 +56,13 @@ class SslcommerzCallbackController extends Controller
             event(new PaymentSucceeded($callback, $validation));
         }
 
-        return redirect('/payment/success');
+        // dd($callback); // Uncomment for debugging if needed
+
+        return response()->json([
+            'message' => 'Payment successful',
+            'tran_id' => $callback->tranId,
+            'amount'  => $callback->amount,
+        ]);
     }
 
     /**

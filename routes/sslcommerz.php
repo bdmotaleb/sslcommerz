@@ -19,16 +19,18 @@ use Sslcommerz\Laravel\Http\Controllers\SslcommerzCallbackController;
 |
 */
 
-Route::prefix(config('sslcommerz.routes.prefix', 'ssl'))->group(function () {
-    Route::post('/success', [SslcommerzCallbackController::class, 'success'])
+$controller = config('sslcommerz.routes.controller', SslcommerzCallbackController::class);
+
+Route::prefix(config('sslcommerz.routes.prefix', 'ssl'))->group(function () use ($controller) {
+    Route::post('/success', [$controller, 'success'])
         ->name('sslcommerz.success');
 
-    Route::post('/fail', [SslcommerzCallbackController::class, 'fail'])
+    Route::post('/fail', [$controller, 'fail'])
         ->name('sslcommerz.fail');
 
-    Route::post('/cancel', [SslcommerzCallbackController::class, 'cancel'])
+    Route::post('/cancel', [$controller, 'cancel'])
         ->name('sslcommerz.cancel');
 
-    Route::post('/ipn', [SslcommerzCallbackController::class, 'ipn'])
+    Route::post('/ipn', [$controller, 'ipn'])
         ->name('sslcommerz.ipn');
 });

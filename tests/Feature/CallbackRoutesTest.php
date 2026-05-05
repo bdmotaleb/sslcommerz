@@ -44,7 +44,12 @@ class CallbackRoutesTest extends TestCase
             'card_type'    => 'VISA',
         ]);
 
-        $response->assertRedirect('/payment/success');
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Payment successful',
+                'tran_id' => 'TXN_SUCCESS_001',
+                'amount'  => '100.00',
+            ]);
 
 
         Event::assertDispatched(PaymentSucceeded::class);
