@@ -63,14 +63,16 @@ php artisan vendor:publish --tag=sslcommerz
 Add these variables to your `.env` file:
 
 ```env
-# Your application URL (IMPORTANT: SSLCOMMERZ sends callbacks to this URL)
-APP_URL=https://yourdomain.com
-
 SSLCOMMERZ_SANDBOX=true
 SSLCOMMERZ_STORE_ID=your_store_id
 SSLCOMMERZ_STORE_PASSWORD=your_store_password
 SSLCOMMERZ_CURRENCY=BDT
 SSLCOMMERZ_LOG_ENABLED=true
+```
+
+```env
+# Your application URL (IMPORTANT: SSLCOMMERZ sends callbacks to this URL)
+APP_URL=https://yourdomain.com
 ```
 
 > **⚠️ Important:** `APP_URL` must be set to your publicly accessible domain (e.g. `https://yourdomain.com`). SSLCOMMERZ uses this to send POST callbacks (success, fail, cancel, IPN) to your server. If `APP_URL` is `http://localhost`, callbacks from SSLCOMMERZ will fail in production.
