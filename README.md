@@ -59,7 +59,6 @@ Add these variables to your `.env` file:
 SSLCOMMERZ_SANDBOX=true
 SSLCOMMERZ_STORE_ID=your_store_id
 SSLCOMMERZ_STORE_PASSWORD=your_store_password
-SSLCOMMERZ_CURRENCY=BDT
 SSLCOMMERZ_LOG_ENABLED=true
 SSLCOMMERZ_LOG_CHANNEL=stack
 SSLCOMMERZ_SALT_KEY=your_salt_key
