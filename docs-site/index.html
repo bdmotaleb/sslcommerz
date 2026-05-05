@@ -242,7 +242,20 @@ SSLCOMMERZ_SANDBOX=true</code></pre>
 
                         <div class="doc-card" id="doc-recurring">
                             <h3><i class="ph ph-calendar-check"></i> Recurring Payments</h3>
-                            <p>Support for Easycheckout recurring payments with encrypted schedules.</p>
+                            <p>Support for Easycheckout recurring payments. Encrypt your schedule and pass it to the <code>initiate</code> method.</p>
+                            <pre><code>$schedule = json_encode([
+    'refer'   => 'PLAN_001',
+    'acct_no' => 'CUS_123',
+    'type'    => 'monthly',
+]);
+
+$encrypted = SSLCOMMERZ::getEncryptionService()->encrypt($schedule);
+
+$response = SSLCOMMERZ::initiate([
+    'total_amount' => 1000.00,
+    'schedule'     => $encrypted,
+    // ...
+]);</code></pre>
                         </div>
 
                         <div class="doc-card" id="doc-refund">
@@ -263,6 +276,21 @@ SSLCOMMERZ_SANDBOX=true</code></pre>
                                 <li><code>PaymentFailed</code></li>
                                 <li><code>IpnReceived</code></li>
                             </ul>
+                        </div>
+
+                        <div class="doc-card" id="doc-callbacks">
+                            <h3><i class="ph ph-phone-call"></i> Callbacks</h3>
+                            <p>The package automatically handles SSLCOMMERZ POST callbacks. Default routes include <code>/ssl/success</code>, <code>/ssl/fail</code>, and <code>/ssl/cancel</code>.</p>
+                        </div>
+
+                        <div class="doc-card" id="doc-custom-controllers">
+                            <h3><i class="ph ph-code"></i> Custom Controllers</h3>
+                            <p>To override default callback behavior, publish the controller and update your configuration.</p>
+                            <pre><code>php artisan vendor:publish --tag=sslcommerz-controller</code></pre>
+                            <p style="margin-top: 10px;">Update <code>config/sslcommerz.php</code>:</p>
+                            <pre><code>'routes' => [
+    'controller' => \App\Http\Controllers\SslcommerzCallbackController::class,
+]</code></pre>
                         </div>
                     </div>
                 </div>
