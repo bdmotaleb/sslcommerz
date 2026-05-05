@@ -75,22 +75,6 @@ SSLCOMMERZ_LOG_ENABLED=true
 
 > **⚠️ Important:** `APP_URL` must be set to your publicly accessible domain (e.g. `https://yourdomain.com`). SSLCOMMERZ uses this to send POST callbacks (success, fail, cancel, IPN) to your server. If `APP_URL` is `http://localhost`, callbacks from SSLCOMMERZ will fail in production.
 
-### Sandbox Test Credentials
-
-Register at [https://developer.sslcommerz.com/registration/](https://developer.sslcommerz.com/registration/) to get your sandbox credentials.
-
-**Test Card Numbers:**
-
-| Card Type   | Number             | Expiry | CVV |
-|------------|-------------------|--------|-----|
-| VISA       | 4111111111111111  | 12/36  | 111 |
-| Mastercard | 5111111111111111  | 12/36  | 111 |
-| Amex       | 371111111111111   | 12/36   | 111 |
-
-**Mobile OTP:** `111111` or `123456`
-
----
-
 ## Quick Start
 
 ```php
@@ -116,6 +100,22 @@ public function checkout(Request $request)
     return back()->with('error', $response->failedReason);
 }
 ```
+
+### Sandbox Test Credentials
+
+Register at [https://developer.sslcommerz.com/registration/](https://developer.sslcommerz.com/registration/) to get your sandbox credentials.
+
+**Test Card Numbers:**
+
+| Card Type   | Number             | Expiry | CVV |
+|------------|-------------------|--------|-----|
+| VISA       | 4111111111111111  | 12/36  | 111 |
+| Mastercard | 5111111111111111  | 12/36  | 111 |
+| Amex       | 371111111111111   | 12/36   | 111 |
+
+**Mobile OTP:** `111111` or `123456`
+
+---
 
 ---
 
