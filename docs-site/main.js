@@ -105,3 +105,44 @@ document.querySelectorAll('.docs-sidebar a').forEach(link => {
         }
     });
 });
+
+// Fetch Real Install Count from Packagist
+async function fetchInstalls() {
+    try {
+        const response = await fetch('https://packagist.org/packages/sslcommerz/laravel.json');
+        const data = await response.json();
+        const totalInstalls = data.package.downloads.total;
+        
+        animateValue("install-count", 0, totalInstalls, 2000);
+    } catch (error) {
+        console.error("Failed to fetch installs", error);
+        document.getElementById('install-count').textContent = '15,000+';
+    }
+}
+
+function animateValue(id, start, end, duration) {
+    const obj = document.getElementById(id);
+    const range = end - start;
+    const minTimer = 50;
+    let stepTime = Math.abs(Math.floor(duration / range));
+    stepTime = Math.max(stepTime, minTimer);
+    
+    const startTime = new Date().getTime();
+    const endTime = startTime + duration;
+    let timer;
+
+    function run() {
+        const now = new Date().getTime();
+        const remaining = Math.max((endTime - now) / duration, 0);
+        const value = Math.round(end - (remaining * range));
+        obj.innerHTML = value.toLocaleString() + '+';
+        if (value == end) {
+            clearInterval(timer);
+        }
+    }
+
+    timer = setInterval(run, stepTime);
+    run();
+}
+
+fetchInstalls();
