@@ -75,6 +75,17 @@ return [
     */
     'routes' => [
         'prefix'     => 'ssl',
+        /*
+        |--------------------------------------------------------------------------
+        | Callback Controller
+        |--------------------------------------------------------------------------
+        |
+        | The controller class that handles SSLCOMMERZ callbacks.
+        | You can publish and modify the default controller:
+        | php artisan vendor:publish --tag=sslcommerz-controller
+        |
+        | After publishing, change this to: \App\Http\Controllers\SslcommerzCallbackController::class
+        */
         'controller' => \Sslcommerz\Laravel\Http\Controllers\SslcommerzCallbackController::class,
         'success'    => '/ssl/success',
         'fail'       => '/ssl/fail',

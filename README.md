@@ -381,21 +381,27 @@ Route::middleware('sslcommerz.verify')
 
 ## Custom Controllers
 
-Override the default callback behavior by publishing the controller and routes. This allows you to customize the logic and define your own redirect URLs:
+You can easily override the default callback behavior.
 
-```bash
-php artisan vendor:publish --tag=sslcommerz
-```
+1. **Publish the Controller Stub:**
+   ```bash
+   php artisan vendor:publish --tag=sslcommerz-controller
+   ```
 
-Then edit `app/Http/Controllers/SslcommerzCallbackController.php`:
+2. **Update Configuration:**
+   In your `config/sslcommerz.php`, update the `controller` option to point to your new controller:
+   ```php
+   'routes' => [
+       'controller' => \App\Http\Controllers\SslcommerzCallbackController::class,
+       // ...
+   ],
+   ```
 
-```php
-public function success(Request $request)
-{
-    // ... logic ...
-    return redirect('/your-custom-success-page');
-}
-```
+3. **Customize Logic:**
+   Edit `app/Http/Controllers/SslcommerzCallbackController.php` to suit your needs.
+
+> **Note:** If you want to customize the URLs or middleware, you can also publish the routes:
+> `php artisan vendor:publish --tag=sslcommerz-routes`
 
 ---
 
