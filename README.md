@@ -1,4 +1,4 @@
-# SSLCOMMERZ Laravel Payment Gateway
+# SSLCOMMERZ Laravel Package
 
 ## Table of Contents
 
@@ -59,9 +59,6 @@ Add these variables to your `.env` file:
 SSLCOMMERZ_SANDBOX=true
 SSLCOMMERZ_STORE_ID=your_store_id
 SSLCOMMERZ_STORE_PASSWORD=your_store_password
-SSLCOMMERZ_LOG_ENABLED=true
-SSLCOMMERZ_LOG_CHANNEL=stack
-SSLCOMMERZ_SALT_KEY=your_salt_key
 ```
 
 ```env
@@ -76,19 +73,16 @@ APP_URL=https://yourdomain.com
 ```php
 use Sslcommerz\Laravel\Facades\SSLCOMMERZ;
 
-// In your controller
 public function checkout(Request $request)
 {
-    // Simply pass an array of parameters to initiate payment
     $response = SSLCOMMERZ::initiate([
         'tran_id'      => 'ORDER_' . uniqid(),
         'total_amount' => 1500.00,
         'cus_name'     => $request->name,
         'cus_email'    => $request->email,
-        // ... other parameters as needed ...
+        // ...
     ]);
 
-    // Check if initiation was successful
     if ($response->isSuccessful()) {
         return $response->redirect(); // Fluent redirect to SSLCOMMERZ
     }
@@ -107,7 +101,7 @@ Register at [https://developer.sslcommerz.com/registration/](https://developer.s
 |------------|-------------------|--------|-----|
 | VISA       | 4111111111111111  | 12/36  | 111 |
 | Mastercard | 5111111111111111  | 12/36  | 111 |
-| Amex       | 371111111111111   | 12/36   | 111 |
+| Amex       | 371111111111111   | 12/36  | 111 |
 
 **Mobile OTP:** `111111` or `123456`
 
@@ -141,15 +135,15 @@ You can easily override the default callback behavior.
 
 ```
 ┌──────────┐     ┌──────────────┐     ┌─────────────┐
-│  Customer │────▶│  Your Server │────▶│ SSLCOMMERZ  │
-│  Browser  │     │  (Laravel)   │     │   API       │
+│  Customer│────▶│  Your Server │────▶│ SSLCOMMERZ  │
+│  Browser │     │  (Laravel)   │     │   API       │
 └──────────┘     └──────────────┘     └─────────────┘
      │                  │                     │
      │  1. Checkout     │                     │
      │─────────────────▶│                     │
-     │                  │  2. Create Session   │
+     │                  │  2. Create Session  │
      │                  │────────────────────▶│
-     │                  │  3. GatewayPageURL   │
+     │                  │  3. GatewayPageURL  │
      │                  │◀────────────────────│
      │  4. Redirect     │                     │
      │◀─────────────────│                     │
@@ -157,11 +151,11 @@ You can easily override the default callback behavior.
      │  5. Pay on SSLCOMMERZ page             │
      │───────────────────────────────────────▶│
      │                  │                     │
-     │                  │  6. IPN Notification │
+     │                  │  6. IPN Notification│
      │                  │◀────────────────────│
-     │                  │  7. Validate (API)   │
+     │                  │  7. Validate (API)  │
      │                  │────────────────────▶│
-     │                  │  8. VALID            │
+     │                  │  8. VALID           │
      │                  │◀────────────────────│
      │                  │                     │
      │  9. Redirect to success_url            │
@@ -184,10 +178,9 @@ $response = SSLCOMMERZ::initiate([
     'cus_name'         => 'John Doe',
     'cus_email'        => 'john@example.com',
     'cus_phone'        => '01711111111',
-    // ... other parameters as needed ...
+    // ...
 ]);
 
-// Response behaves like an array and an object
 if ($response['status'] === 'SUCCESS') {
     return $response->redirect();
 }
@@ -214,25 +207,22 @@ Add `SSLCOMMERZ_SALT_KEY` to your `.env` file. This key is provided by the SSLCO
 ```php
 use Sslcommerz\Laravel\Facades\SSLCOMMERZ;
 
-// 1. Prepare schedule data
 $schedule = json_encode([
-    'refer'   => 'REF1234', // Plan ID from Merchant Panel
-    'acct_no' => 'CUS_001',  // Customer account reference
-    'type'    => 'monthly',
+    'refer'      => 'REF1234', // Plan ID from Merchant Panel
+    'acct_no'    => 'CUS_001',  // Customer account reference
+    'type'       => 'monthly',
     'dayofmonth' => '24',
 ]);
 
-// 2. Encrypt the schedule
 $encryptedSchedule = SSLCOMMERZ::getEncryptionService()->encrypt($schedule);
 
-// 3. Initiate payment
 $response = SSLCOMMERZ::initiate([
-    // ... mandatory fields ...
+    // ...
     'schedule'     => $encryptedSchedule,
 ]);
 
+// If successful, a subscription_id will be returned in the callback/response
 if ($response->isSuccessful()) {
-    // If successful, a subscription_id will be returned in the callback/response
     $subscriptionId = $response->subscriptionId;
 }
 ```
@@ -289,6 +279,12 @@ if ($result->hasTransactions()) {
     $latest = $result->getLatestSuccessful();
     echo "Status: " . $latest['status'];
 }
+```
+
+### Custom Log Channel
+```env
+SSLCOMMERZ_LOG_ENABLED=true
+SSLCOMMERZ_LOG_CHANNEL=stack
 ```
 
 ---
