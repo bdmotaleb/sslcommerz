@@ -42,11 +42,10 @@ class SslcommerzCallbackController extends Controller
             try {
                 $validation = $this->gateway->validate($callback->valId);
             } catch (\Exception $e) {
-                Log::channel(config('sslcommerz.logging.channel', 'stack'))
-                    ->error('SSLCOMMERZ validation failed in success callback', [
-                        'tran_id' => $callback->tranId,
-                        'error'   => $e->getMessage(),
-                    ]);
+                Log::error('SSLCOMMERZ validation failed in success callback', [
+                    'tran_id' => $callback->tranId,
+                    'error'   => $e->getMessage(),
+                ]);
             }
         }
 
@@ -100,10 +99,9 @@ class SslcommerzCallbackController extends Controller
 
         // Verify hash integrity
         if (!$this->gateway->verifyHash($request->all())) {
-            Log::channel(config('sslcommerz.logging.channel', 'stack'))
-                ->warning('SSLCOMMERZ IPN hash verification failed', [
-                    'tran_id' => $callback->tranId,
-                ]);
+            Log::warning('SSLCOMMERZ IPN hash verification failed', [
+                'tran_id' => $callback->tranId,
+            ]);
 
             return response('INVALID HASH', 403);
         }
@@ -115,11 +113,10 @@ class SslcommerzCallbackController extends Controller
             try {
                 $validation = $this->gateway->validate($callback->valId);
             } catch (\Exception $e) {
-                Log::channel(config('sslcommerz.logging.channel', 'stack'))
-                    ->error('SSLCOMMERZ validation failed in IPN', [
-                        'tran_id' => $callback->tranId,
-                        'error'   => $e->getMessage(),
-                    ]);
+                Log::error('SSLCOMMERZ validation failed in IPN', [
+                    'tran_id' => $callback->tranId,
+                    'error'   => $e->getMessage(),
+                ]);
             }
         }
 
@@ -139,11 +136,10 @@ class SslcommerzCallbackController extends Controller
             return;
         }
 
-        Log::channel(config('sslcommerz.logging.channel', 'stack'))
-            ->info("SSLCOMMERZ callback [{$type}]", [
-                'tran_id' => $callback->tranId,
-                'status'  => $callback->status,
-                'amount'  => $callback->amount,
-            ]);
+        Log::info("SSLCOMMERZ callback [{$type}]", [
+            'tran_id' => $callback->tranId,
+            'status'  => $callback->status,
+            'amount'  => $callback->amount,
+        ]);
     }
 }

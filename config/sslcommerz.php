@@ -105,7 +105,6 @@ return [
     */
     'logging' => [
         'enabled' => env('SSLCOMMERZ_LOG_ENABLED', true),
-        'channel' => env('SSLCOMMERZ_LOG_CHANNEL', 'stack'),
     ],
 
     /*

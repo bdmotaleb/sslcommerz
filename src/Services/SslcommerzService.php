@@ -404,8 +404,6 @@ class SslcommerzService implements PaymentGatewayInterface
             return;
         }
 
-        $channel = config('sslcommerz.logging.channel', 'stack');
-
-        Log::channel($channel)->info("SSLCOMMERZ [{$action}]", $data);
+        Log::info("SSLCOMMERZ [{$action}]", $data);
     }
 }

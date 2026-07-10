@@ -66,7 +66,7 @@ SSLCOMMERZ_STORE_PASSWORD=your_store_password
 APP_URL=https://yourdomain.com
 ```
 
-> **Note:** `SSLCOMMERZ_SALT_KEY` is required for recurring payments (Easycheckout). `SSLCOMMERZ_LOG_CHANNEL` lets you pick a Laravel log channel.
+> **Note:** `SSLCOMMERZ_SALT_KEY` is required for recurring payments (Easycheckout).
 
 ## Quick Start
 
@@ -281,11 +281,11 @@ if ($result->hasTransactions()) {
 }
 ```
 
-### Custom Log Channel
+### Logging
 ```env
 SSLCOMMERZ_LOG_ENABLED=true
-SSLCOMMERZ_LOG_CHANNEL=stack
 ```
+By default, the package logs all gateway interactions using Laravel's default log configuration. You can disable logging by setting `SSLCOMMERZ_LOG_ENABLED=false`.
 
 ---
 
