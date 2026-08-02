@@ -97,16 +97,6 @@ class SslcommerzCallbackController extends Controller
 
         $this->logCallback('ipn', $callback);
 
-        // Verify hash integrity
-        if (!$this->gateway->verifyHash($request->all())) {
-            Log::warning('SSLCOMMERZ IPN hash verification failed', [
-                'tran_id' => $callback->tranId,
-            ]);
-
-            return response('INVALID HASH', 403);
-        }
-
-
         // Validate with SSLCOMMERZ API
         $validation = null;
         if ($callback->valId && $callback->isValid()) {
